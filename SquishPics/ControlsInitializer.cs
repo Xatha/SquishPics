@@ -7,13 +7,14 @@ public class ControlsInitializer
     private static readonly FileQueueControl _fileQueueControl;
     private static readonly SortingControl _sortingControl;
     private static readonly ConnectingControl _connectingControl;
-
-    
+    private static readonly StartStopButtonControl _startStopButtonControl;
+            
     static ControlsInitializer()
     {
         _sortingControl = new SortingControl();
         _fileQueueControl = new FileQueueControl(_sortingControl);
         _connectingControl = new ConnectingControl(Program.DiscordClient);
+        _startStopButtonControl = new StartStopButtonControl();
     }
 
     public static Task InitializeControls(Form form)
@@ -42,10 +43,18 @@ public class ControlsInitializer
         _connectingControl.Size = new Size(213, 26);
         _connectingControl.TabIndex = 19;
 
+        // StartStopButton
+        _startStopButtonControl.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        _startStopButtonControl.Location = new Point(556, 412);
+        _startStopButtonControl.Name = "StartStopButton";
+        _startStopButtonControl.Size = new Size(103, 26);
+        _startStopButtonControl.TabIndex = 5;
+        
         // Add the controls to the form
         form.Controls.Add(_fileQueueControl);
         form.Controls.Add(_sortingControl);
         form.Controls.Add(_connectingControl);
+        form.Controls.Add(_startStopButtonControl);
         
         //Finalizing Settings
         _fileQueueControl.DoubleBuffered(true);

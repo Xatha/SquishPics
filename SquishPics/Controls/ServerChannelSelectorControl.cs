@@ -3,7 +3,7 @@ using Discord.WebSocket;
 
 namespace SquishPics.Controls
 {
-    public partial class ServerChannelSelector : UserControl
+    public partial class ServerChannelSelectorControl : UserControl
     {
         private IReadOnlyCollection<RestGuild>? _guilds;
         private IEnumerable<SocketTextChannel>? _textChannels;
@@ -11,7 +11,7 @@ namespace SquishPics.Controls
         public RestGuild? SelectedGuild { get; private set; }
         public SocketTextChannel? SelectedTextChannel { get; private set; }
 
-        public ServerChannelSelector()
+        public ServerChannelSelectorControl()
         {
             InitializeComponent();
             Task.Run(Initialize);

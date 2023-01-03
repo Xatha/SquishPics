@@ -51,9 +51,11 @@
             return Task.CompletedTask;
         }
 
-        private static Task<List<FileInfo>> SortFiles(IEnumerable<FileInfo> unsortedFiles)
+        private static async Task<List<FileInfo>> SortFiles(IEnumerable<FileInfo> unsortedFiles)
         {
-            var fileSortType = (GlobalSettings.Default.SORTING_MODE, GlobalSettings.Default.SORTING_ORDER) switch
+            var sortingMode = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.SORTING_MODE);
+            var sortingOrder = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.SORTING_ORDER);
+            var fileSortType = (sortingMode, sortingOrder) switch
             {
                 ("Name", "Ascending")  => unsortedFiles.OrderBy(f => f.Name).ToList(),                                //If FileSortType.ByName    
                 ("Name", "Descending") => unsortedFiles.OrderByDescending(f => f.Name).ToList(),                      //If FileSortType.ByName 
@@ -65,7 +67,7 @@
                 ("Date Modified", "Descending") => unsortedFiles.OrderByDescending(f => f.LastWriteTimeUtc).ToList(), //If FileSortType.ByDate
                 _                      => unsortedFiles.ToList()
             };
-            return Task.FromResult(fileSortType);
+            return fileSortType;
         }
 
         private async void ImportFilesButton_Click(object? sender, EventArgs e)

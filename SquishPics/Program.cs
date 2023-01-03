@@ -9,7 +9,8 @@ namespace SquishPics
         [STAThread]
         private static void Main()
         {
-            DiscordClient = new DiscordClient(GlobalSettings.Default.API_KEY);
+            
+            DiscordClient = new DiscordClient(  GlobalSettings.Default.API_KEY);
             GlobalSettings.StartAutoSave(); 
             
             // To customize application configuration such as set high DPI settings or default font,

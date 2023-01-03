@@ -30,10 +30,9 @@
         {
             this.StatusProgressBar = new System.Windows.Forms.ProgressBar();
             this.StatusProgressBarLabel = new System.Windows.Forms.Label();
-            this.StartStopButton = new System.Windows.Forms.Button();
             this.ApiKeyButton = new System.Windows.Forms.Button();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-            this.serverChannelSelector1 = new SquishPics.Controls.ServerChannelSelector();
+            this.serverChannelSelector1 = new SquishPics.Controls.ServerChannelSelectorControl();
             this.SuspendLayout();
             // 
             // StatusProgressBar
@@ -53,16 +52,6 @@
             this.StatusProgressBarLabel.Size = new System.Drawing.Size(42, 15);
             this.StatusProgressBarLabel.TabIndex = 1;
             this.StatusProgressBarLabel.Text = "Status:";
-            // 
-            // StartStopButton
-            // 
-            this.StartStopButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.StartStopButton.Location = new System.Drawing.Point(556, 412);
-            this.StartStopButton.Name = "StartStopButton";
-            this.StartStopButton.Size = new System.Drawing.Size(103, 23);
-            this.StartStopButton.TabIndex = 5;
-            this.StartStopButton.Text = "Start";
-            this.StartStopButton.UseVisualStyleBackColor = true;
             // 
             // ApiKeyButton
             // 
@@ -90,7 +79,6 @@
             this.ClientSize = new System.Drawing.Size(673, 450);
             this.Controls.Add(this.serverChannelSelector1);
             this.Controls.Add(this.ApiKeyButton);
-            this.Controls.Add(this.StartStopButton);
             this.Controls.Add(this.StatusProgressBarLabel);
             this.Controls.Add(this.StatusProgressBar);
             this.MinimumSize = new System.Drawing.Size(689, 489);
@@ -106,9 +94,8 @@
 
         private ProgressBar StatusProgressBar;
         private Label StatusProgressBarLabel;
-        private Button StartStopButton;
         private Button ApiKeyButton;
         private ColorDialog colorDialog1;
-        private Controls.ServerChannelSelector serverChannelSelector1;
+        private Controls.ServerChannelSelectorControl serverChannelSelector1;
     }
 }

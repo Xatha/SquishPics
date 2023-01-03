@@ -19,7 +19,6 @@ public partial class SquishPicsForm : Form
     }
 
     //TODO: Move these propagated events to a separate class
-
     private async void Form1_Load(object sender, EventArgs e)
     {
         await ControlsInitializer.InitializeControls(this);

@@ -1,4 +1,5 @@
-﻿using Accessibility;
+﻿using System.Diagnostics;
+using Accessibility;
 using SquishPicsDiscordBackend;
 
 namespace SquishPics.Controls;
@@ -59,7 +60,12 @@ public partial class ConnectingControl : UserControl
 
     private async void button1_Click(object sender, EventArgs e)
     {
-        await _discordClient.RetryLoginAsync(GlobalSettings.Default.API_KEY);
+        if (await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.API_KEY) is var key && key is null)
+        {
+            Console.WriteLine(@"Could not retrieve key for the client."); //TODO: Logging
+            return;
+        }
+        await _discordClient.RetryLoginAsync(key);
     }
 
     private enum State

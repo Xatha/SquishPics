@@ -1,6 +1,6 @@
 ﻿namespace SquishPics.Controls
 {
-    partial class ServerChannelSelector
+    partial class ServerChannelSelectorControl
     {
         /// <summary> 
         /// Required designer variable.
@@ -80,7 +80,7 @@
             this.Controls.Add(this.ChannelListBox);
             this.Controls.Add(this.ChannelsLabel);
             this.Controls.Add(this.ServersLabel);
-            this.Name = "ServerChannelSelector";
+            this.Name = "ServerChannelSelectorControl";
             this.Size = new System.Drawing.Size(340, 203);
             this.ResumeLayout(false);
             this.PerformLayout();

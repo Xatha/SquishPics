@@ -7,12 +7,12 @@ internal partial class GlobalSettings
     private static readonly object _locker = new();
     private static Timer? _timer;
 
-    internal static void ForceSave() => GlobalSettings.Default.Save();
+    internal static void ForceSave() => Default.Save();
     
     internal static void StartAutoSave()
     {
         _timer = new Timer(
-            _ => GlobalSettings.Default.Save(),
+            _ => Default.Save(),
             null,
             TimeSpan.Zero,
             TimeSpan.FromSeconds(10));
