@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Compile Update="Controls\APIKeyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Controls\ConnectingControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\FileQueueControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\ServerChannelSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\SortingControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="SquishPicsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>
