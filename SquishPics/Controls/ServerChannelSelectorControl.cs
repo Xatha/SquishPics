@@ -1,30 +1,34 @@
 ﻿using Discord.Rest;
 using Discord.WebSocket;
+using SquishPicsDiscordBackend;
 
 namespace SquishPics.Controls
 {
     public partial class ServerChannelSelectorControl : UserControl
     {
+        private readonly DiscordClient _client;
         private IReadOnlyCollection<RestGuild>? _guilds;
         private IEnumerable<SocketTextChannel>? _textChannels;
 
+        
         public RestGuild? SelectedGuild { get; private set; }
         public SocketTextChannel? SelectedTextChannel { get; private set; }
 
-        public ServerChannelSelectorControl()
+        public ServerChannelSelectorControl(DiscordClient client)
         {
+            _client = client;
             InitializeComponent();
             Task.Run(Initialize);
         }
 
         private async Task Initialize()
         {
-            _guilds = await Program.DiscordClient.GetServersAsync();
+            _guilds = await _client.GetServersAsync();
             if (_guilds is null) 
             {
                 Console.WriteLine(@"No guilds found. Retrying...");
                 await Task.Delay(2000); // Retry in 2 seconds
-                _guilds = await Program.DiscordClient.GetServersAsync();
+                _guilds = await _client.GetServersAsync();
             }
             if (_guilds is null) 
             {
@@ -45,9 +49,9 @@ namespace SquishPics.Controls
             SelectedGuild = _guilds?.FirstOrDefault(guild => guild.Name == selectedServer);
             if (SelectedGuild is null) return;
 
-            _textChannels = await Program.DiscordClient.GetChannelsAsync(SelectedGuild)!;
+            _textChannels = await _client.GetChannelsAsync(SelectedGuild)!;
 
-            var textChannels = await Program.DiscordClient.GetChannelsAsync(SelectedGuild)!;
+            var textChannels = await _client.GetChannelsAsync(SelectedGuild)!;
             Invoke(() =>
             {
                 ChannelListBox.Items.Clear();

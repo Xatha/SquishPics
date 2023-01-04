@@ -1,19 +1,25 @@
-﻿namespace SquishPics.Controls
+﻿using System.Configuration;
+
+namespace SquishPics.Controls
 {
     public partial class FileQueueControl : UserControl
     {
         private List<FileInfo> _fileList;
+        private List<string> _linkList;
+
+        public List<FileInfo> FileContents => _fileList;
+        public List<string> LinkContents => _linkList;
 
         public FileQueueControl(SortingControl sortingControl)
         {
             InitializeComponent();
 
             _fileList = new List<FileInfo>();
+            _linkList = new List<string>();
             
             CurrentQueueListView.DragEnter += CurrentQueueListView_DragEnter;
             CurrentQueueListView.DragDrop  += CurrentQueueListView_DragDrop;
             CurrentQueueListView.DragLeave += CurrentQueueListView_DragLeave;
-            
             ClearQueueButton.Click         += ClearQueueButton_Click;
             ImportFilesButton.Click        += ImportFilesButton_Click;
 
@@ -27,7 +33,7 @@
         }
 
         //TODO: Perhaps there's a way to keep order without having to re-add all the items?
-        private async Task UpdateQueueOrderAsync() => _fileList = await SortFiles(_fileList);
+        private async Task UpdateQueueOrderAsync() => _fileList = await SortFilesAsync(_fileList);
 
         //TODO: Perhaps there's a way to keep order without having to re-add all the items?
         private Task UpdateQueueViewAsync()
@@ -51,7 +57,7 @@
             return Task.CompletedTask;
         }
 
-        private static async Task<List<FileInfo>> SortFiles(IEnumerable<FileInfo> unsortedFiles)
+        private static async Task<List<FileInfo>> SortFilesAsync(IEnumerable<FileInfo> unsortedFiles)
         {
             var sortingMode = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.SORTING_MODE);
             var sortingOrder = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.SORTING_ORDER);
@@ -75,11 +81,16 @@
             using var openFileDialog = new OpenFileDialog
             {
                 Multiselect = true,
-                Filter = @"Image Files (*.jpg;*.jpeg;*.png;*.gif;*.gifv;*.mp4)|*.jpg;*.jpeg;*.png;*.gif;*.gifv;*.mp4",
-                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)
+                Filter = @"Image Files (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png;", //TODO: We can currently only compress these file types.
+                    //@"Image Files (*.jpg;*.jpeg;*.png;*.gif;*.gifv;*.mp4)|*.jpg;*.jpeg;*.png;*.gif;*.gifv;*.mp4",
+                InitialDirectory = await GetLastVisitedDirectoryAsync(),
+                Title = @"Select files to import"
             };
             
             if (openFileDialog.ShowDialog() != DialogResult.OK) return;
+            
+            await GlobalSettings.SafeSetSettingAsync(SettingKeys.LAST_VISITED_DIRECTORY_DIALOGUE, 
+                Path.GetDirectoryName(openFileDialog.FileNames[0]) ?? string.Empty);
             
             foreach (var fileName in openFileDialog.FileNames)
             {
@@ -88,6 +99,13 @@
 
             await UpdateQueueOrderAsync();
             await UpdateQueueViewAsync();
+        }
+
+        private static async Task<string> GetLastVisitedDirectoryAsync()
+        {
+            var directory = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.LAST_VISITED_DIRECTORY_DIALOGUE);
+            if (!Directory.Exists(directory)) directory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            return directory;
         }
 
         private void ClearQueueButton_Click(object? sender, EventArgs e)

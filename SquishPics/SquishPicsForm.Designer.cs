@@ -32,7 +32,6 @@
             this.StatusProgressBarLabel = new System.Windows.Forms.Label();
             this.ApiKeyButton = new System.Windows.Forms.Button();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-            this.serverChannelSelector1 = new SquishPics.Controls.ServerChannelSelectorControl();
             this.SuspendLayout();
             // 
             // StatusProgressBar
@@ -62,22 +61,12 @@
             this.ApiKeyButton.TabIndex = 10;
             this.ApiKeyButton.Text = "API KEY";
             this.ApiKeyButton.UseVisualStyleBackColor = true;
-            this.ApiKeyButton.Click += new System.EventHandler(this.ApiKeyButton_Click);
-            // 
-            // serverChannelSelector1
-            // 
-            this.serverChannelSelector1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.serverChannelSelector1.Location = new System.Drawing.Point(326, 147);
-            this.serverChannelSelector1.Name = "serverChannelSelector1";
-            this.serverChannelSelector1.Size = new System.Drawing.Size(340, 203);
-            this.serverChannelSelector1.TabIndex = 21;
             // 
             // SquishPicsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(673, 450);
-            this.Controls.Add(this.serverChannelSelector1);
             this.Controls.Add(this.ApiKeyButton);
             this.Controls.Add(this.StatusProgressBarLabel);
             this.Controls.Add(this.StatusProgressBar);
@@ -96,6 +85,5 @@
         private Label StatusProgressBarLabel;
         private Button ApiKeyButton;
         private ColorDialog colorDialog1;
-        private Controls.ServerChannelSelectorControl serverChannelSelector1;
     }
 }

@@ -93,5 +93,17 @@ namespace SquishPics {
                 this["MAX_FILE_SIZE"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LAST_VISITED_DIRECTORY_DIALOGUE {
+            get {
+                return ((string)(this["LAST_VISITED_DIRECTORY_DIALOGUE"]));
+            }
+            set {
+                this["LAST_VISITED_DIRECTORY_DIALOGUE"] = value;
+            }
+        }
     }
 }

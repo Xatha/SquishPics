@@ -30,7 +30,7 @@
             var value = MaxFileSizeTextBox.Text.Length > 0
                 ? int.Parse(MaxFileSizeTextBox.Text)
                 : await GlobalSettings.SafeGetSettingAsync<int>(SettingKeys.MAX_FILE_SIZE);
-            await GlobalSettings.SafeSetSetting(SettingKeys.MAX_FILE_SIZE, value);
+            await GlobalSettings.SafeSetSettingAsync(SettingKeys.MAX_FILE_SIZE, value);
         }
         
         private void MaxFileSizeTextBox_KeyPress(object? sender, KeyPressEventArgs e)
@@ -41,13 +41,13 @@
         private async void SortingModesComboBox_SelectedValueChanged(object? sender, EventArgs e)
         {
             if (await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.SORTING_MODE) == SortingModesComboBox.Text) return;
-            await GlobalSettings.SafeSetSetting(SettingKeys.SORTING_MODE, SortingModesComboBox.Text);
+            await GlobalSettings.SafeSetSettingAsync(SettingKeys.SORTING_MODE, SortingModesComboBox.Text);
         }
         
         private async void SortingOrderComboBox_SelectedValueChanged(object? sender, EventArgs e)
         {
             if (await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.SORTING_ORDER) == SortingOrderComboBox.Text) return;
-            await GlobalSettings.SafeSetSetting(SettingKeys.SORTING_ORDER, SortingOrderComboBox.Text);
+            await GlobalSettings.SafeSetSettingAsync(SettingKeys.SORTING_ORDER, SortingOrderComboBox.Text);
         }
 
         public event EventHandler? OnSelectedValueChanged

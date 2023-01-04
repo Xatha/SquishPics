@@ -20,6 +20,9 @@
     <Setting Name="MAX_FILE_SIZE" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="LAST_VISITED_DIRECTORY_DIALOGUE" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>
 

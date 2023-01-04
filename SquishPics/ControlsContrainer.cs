@@ -1,23 +1,28 @@
 using SquishPics.Controls;
+using SquishPicsDiscordBackend;
 
 namespace SquishPics;
 
-public class ControlsInitializer
+public sealed class ControlsContainer
 {
-    private static readonly FileQueueControl _fileQueueControl;
-    private static readonly SortingControl _sortingControl;
-    private static readonly ConnectingControl _connectingControl;
-    private static readonly StartStopButtonControl _startStopButtonControl;
-            
-    static ControlsInitializer()
+    private readonly Form _form;
+    private readonly FileQueueControl _fileQueueControl;
+    private readonly SortingControl _sortingControl;
+    private readonly ConnectingControl _connectingControl;
+    private readonly StartStopButtonControl _startStopButtonControl;
+    private readonly ServerChannelSelectorControl _serverChannelSelectorControl;
+
+    public ControlsContainer(Form form, DiscordClient client)
     {
+        _form = form;
         _sortingControl = new SortingControl();
         _fileQueueControl = new FileQueueControl(_sortingControl);
-        _connectingControl = new ConnectingControl(Program.DiscordClient);
-        _startStopButtonControl = new StartStopButtonControl();
+        _connectingControl = new ConnectingControl(client);
+        _startStopButtonControl = new StartStopButtonControl(client, _fileQueueControl);
+        _serverChannelSelectorControl = new ServerChannelSelectorControl(client);
     }
 
-    public static Task InitializeControls(Form form)
+    public async Task InitializeControls()
     {
         // fileQueueControl
         _fileQueueControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom 
@@ -29,6 +34,7 @@ public class ControlsInitializer
         _fileQueueControl.Name = "fileQueueControl";
         _fileQueueControl.Size = new Size(309, 339);
         _fileQueueControl.TabIndex = 19;
+        _fileQueueControl.DoubleBuffered(true);
         
         // sortingControl
         _sortingControl.Anchor = AnchorStyles.Right;
@@ -43,21 +49,31 @@ public class ControlsInitializer
         _connectingControl.Size = new Size(213, 26);
         _connectingControl.TabIndex = 19;
 
-        // StartStopButton
+        // startStopButtonControl
         _startStopButtonControl.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _startStopButtonControl.Location = new Point(556, 412);
         _startStopButtonControl.Name = "StartStopButton";
         _startStopButtonControl.Size = new Size(103, 26);
         _startStopButtonControl.TabIndex = 5;
         
-        // Add the controls to the form
-        form.Controls.Add(_fileQueueControl);
-        form.Controls.Add(_sortingControl);
-        form.Controls.Add(_connectingControl);
-        form.Controls.Add(_startStopButtonControl);
+        // serverChannelSelector
+        _serverChannelSelectorControl.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+        _serverChannelSelectorControl.Location = new Point(326, 147);
+        _serverChannelSelectorControl.Name = "serverChannelSelector1";
+        _serverChannelSelectorControl.Size = new Size(340, 203);
+        _serverChannelSelectorControl.TabIndex = 21;
         
-        //Finalizing Settings
-        _fileQueueControl.DoubleBuffered(true);
+        await AddControlsToForm();
+    }
+
+    private Task AddControlsToForm()
+    {
+        // Add the controls to the form
+        _form.Controls.Add(_fileQueueControl);
+        _form.Controls.Add(_sortingControl);
+        _form.Controls.Add(_connectingControl);
+        _form.Controls.Add(_startStopButtonControl);
+        _form.Controls.Add(_serverChannelSelectorControl);
         return Task.CompletedTask;
     }
 }

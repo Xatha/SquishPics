@@ -38,7 +38,7 @@ internal partial class GlobalSettings
     }
 
     //TODO, This might be wrong but hopefully this won't lead to concurrency issues.
-    internal static Task SafeSetSetting<T>(SettingKeys key, T value)
+    internal static Task SafeSetSettingAsync<T>(SettingKeys key, T value)
     {
         lock (_locker)
         {
@@ -64,4 +64,5 @@ internal enum SettingKeys
     SELECTED_SERVER,
     SELECTED_CHANNEL,
     MAX_FILE_SIZE,
+    LAST_VISITED_DIRECTORY_DIALOGUE
 }

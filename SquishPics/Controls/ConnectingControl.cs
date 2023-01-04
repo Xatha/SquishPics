@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using Accessibility;
-using SquishPicsDiscordBackend;
+﻿using SquishPicsDiscordBackend;
 
 namespace SquishPics.Controls;
 
@@ -8,12 +6,7 @@ public partial class ConnectingControl : UserControl
 {
     private readonly DiscordClient _discordClient;
     private State _state;
-
-    private ConnectingControl()
-    {
-        InitializeComponent();
-    }
-
+    
     public ConnectingControl(DiscordClient discordClient)
     {
         InitializeComponent();
@@ -33,9 +26,7 @@ public partial class ConnectingControl : UserControl
             _state = State.Connected;
             button1.Enabled = false;
             button1.BackColor = Color.PaleGreen;
-            button1.Text = "Connected!";
-
-            Console.WriteLine("Connected");
+            button1.Text = @"Connected!";
             return Task.CompletedTask;
         });
         return Task.CompletedTask;
@@ -50,9 +41,7 @@ public partial class ConnectingControl : UserControl
             _state = State.Disconnected;
             button1.Enabled = true;
             button1.BackColor = Color.IndianRed;
-            button1.Text = "Disconnected... Click to reconnect!";
-
-            Console.WriteLine("Disconnected");
+            button1.Text = @"Disconnected... Click to reconnect!";
             return Task.CompletedTask;
         });
         return Task.CompletedTask;
