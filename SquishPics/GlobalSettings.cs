@@ -36,6 +36,20 @@ internal partial class GlobalSettings
             return Task.FromResult<T?>(default);
         }
     }
+    internal static T? SafeGetSetting<T>(SettingKeys key)
+    {
+        try
+        {
+            ForceSave();
+            return (T?)Default[key.ToString()];
+        }
+        catch (Exception)
+        {
+            Console.WriteLine(@"Error getting setting: " + key);
+            return default;
+        }
+    }
+    
 
     //TODO, This might be wrong but hopefully this won't lead to concurrency issues.
     internal static Task SafeSetSettingAsync<T>(SettingKeys key, T value)
@@ -61,8 +75,6 @@ internal enum SettingKeys
     API_KEY,
     SORTING_MODE,
     SORTING_ORDER,
-    SELECTED_SERVER,
-    SELECTED_CHANNEL,
     MAX_FILE_SIZE,
     LAST_VISITED_DIRECTORY_DIALOGUE
 }

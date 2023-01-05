@@ -32,6 +32,7 @@
             this.StatusProgressBarLabel = new System.Windows.Forms.Label();
             this.ApiKeyButton = new System.Windows.Forms.Button();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.ExceptionButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // StatusProgressBar
@@ -62,11 +63,21 @@
             this.ApiKeyButton.Text = "API KEY";
             this.ApiKeyButton.UseVisualStyleBackColor = true;
             // 
+            // ExceptionButton
+            // 
+            this.ExceptionButton.Location = new System.Drawing.Point(453, 12);
+            this.ExceptionButton.Name = "ExceptionButton";
+            this.ExceptionButton.Size = new System.Drawing.Size(127, 23);
+            this.ExceptionButton.TabIndex = 11;
+            this.ExceptionButton.Text = "Throw Exception";
+            this.ExceptionButton.UseVisualStyleBackColor = true;
+            // 
             // SquishPicsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(673, 450);
+            this.Controls.Add(this.ExceptionButton);
             this.Controls.Add(this.ApiKeyButton);
             this.Controls.Add(this.StatusProgressBarLabel);
             this.Controls.Add(this.StatusProgressBar);
@@ -85,5 +96,6 @@
         private Label StatusProgressBarLabel;
         private Button ApiKeyButton;
         private ColorDialog colorDialog1;
+        private Button ExceptionButton;
     }
 }

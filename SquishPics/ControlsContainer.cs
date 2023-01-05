@@ -1,3 +1,4 @@
+using SquishPics.Controllers;
 using SquishPics.Controls;
 using SquishPicsDiscordBackend;
 
@@ -6,23 +7,23 @@ namespace SquishPics;
 public sealed class ControlsContainer
 {
     private readonly Form _form;
-    private readonly FileQueueControl _fileQueueControl;
     private readonly SortingControl _sortingControl;
+    private readonly FileQueueControl _fileQueueControl;
     private readonly ConnectingControl _connectingControl;
     private readonly StartStopButtonControl _startStopButtonControl;
     private readonly ServerChannelSelectorControl _serverChannelSelectorControl;
 
-    public ControlsContainer(Form form, DiscordClient client)
+    public ControlsContainer(Form form, DiscordClient client, ApiController apiController)
     {
         _form = form;
         _sortingControl = new SortingControl();
         _fileQueueControl = new FileQueueControl(_sortingControl);
         _connectingControl = new ConnectingControl(client);
-        _startStopButtonControl = new StartStopButtonControl(client, _fileQueueControl);
+        _startStopButtonControl = new StartStopButtonControl(apiController, _fileQueueControl);
         _serverChannelSelectorControl = new ServerChannelSelectorControl(client);
     }
 
-    public async Task InitializeControls()
+    public async Task InitializeControlsAsync()
     {
         // fileQueueControl
         _fileQueueControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom 
@@ -63,10 +64,10 @@ public sealed class ControlsContainer
         _serverChannelSelectorControl.Size = new Size(340, 203);
         _serverChannelSelectorControl.TabIndex = 21;
         
-        await AddControlsToForm();
+        await AddControlsToFormAsync();
     }
 
-    private Task AddControlsToForm()
+    private Task AddControlsToFormAsync()
     {
         // Add the controls to the form
         _form.Controls.Add(_fileQueueControl);

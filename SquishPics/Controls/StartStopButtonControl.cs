@@ -1,5 +1,4 @@
-using CompressionLibrary;
-using SquishPicsDiscordBackend;
+using SquishPics.Controllers;
 
 namespace SquishPics.Controls;
 
@@ -7,96 +6,112 @@ public partial class StartStopButtonControl : UserControl
 {
     private bool _isRunning;
     private bool _isLocked;
-    private readonly FileQueueControl _fileQueueControl;
-    private readonly DiscordClient _client;
     
-    public StartStopButtonControl(DiscordClient client, FileQueueControl fileQueueControl)
+    private readonly ApiController _apiController;
+    private readonly FileQueueControl _fileQueueControl;
+
+    public StartStopButtonControl(ApiController apiController, FileQueueControl fileQueueControl)
     {
+        _apiController = apiController;
+        _fileQueueControl = fileQueueControl;
         _isRunning = false;
         _isLocked = false;
-        _fileQueueControl = fileQueueControl;
-        _client = client;
         
         InitializeComponent();
         StartStopButton.Click += StartStopButton_Click;
+        _apiController.RequestFinished += _apiController_RequestFinished;
     }
 
-    private Task UpdateStyleAsync()
+    private Task UpdateStyleAsync(bool isRunning)
     {
-        if (_isRunning)
+        if (isRunning)
         {
+            Console.WriteLine("Red  ");
             StartStopButton.BackColor = Color.IndianRed;
             StartStopButton.Text = @"Stop Process";
         }
         else
         {
+            Console.WriteLine("Green");
             StartStopButton.BackColor = Color.PaleGreen;
             StartStopButton.Text = @"Start Process";
         }
         return Task.CompletedTask;
     }
+    
     private async void StartStopButton_Click(object? sender, EventArgs e)
     {
         // We lock the button since we don't want the user to be able to spam the button or click it while it's processing a request.
         if (_isLocked) return;
 
         _isLocked = true;
-        
         if (_isRunning)
         {
             // Stop the process
-            var result = await CancelApiRequest();
-            if (!result) return; //TODO: Add exception/blowup.
-        
+            await CancelApiRequestAsync();
+            /*var result = await CancelApiRequestAsync();
+            if (!result) return; //TODO: Add exception/blowup.*/
+            
             _isRunning = false;
-            await UpdateStyleAsync();
+            _isLocked = false;
+            await Invoke(async ()=> await UpdateStyleAsync(false));
         }
         else
         {
-            // Start the process
-            var result = await StartApiRequest();
-            if (!result) return; // TODO: Add error message
+            var server = ServerChannelSelectorControl.SelectedServer;
+            var channel =  ServerChannelSelectorControl.SelectedTextChannel;
             
+            if (_fileQueueControl.FileContents.Count <= 0)
+            {
+                MessageBox.Show(@"Please select files to send.");
+                _isLocked = false;
+                return;
+            }
+            
+            if (server == null || channel == null)
+            {
+                MessageBox.Show(@"Please select a server and channel.");
+                _isLocked = false;
+                return;
+            }
+            
+            
+            
+            
+            
+            
+            if (MessageBox.Show(
+                    $"Do you want to begin posting images> Images will be send in:\nServer: {server.Name}\nChannel: {channel.Name}",
+                    @"Start Process?", MessageBoxButtons.YesNo) ==
+                DialogResult.No)
+            {
+                _isLocked = false;
+                return;
+            }
             // If the request was successful, we start the process.
-            _isRunning = true;
-            await UpdateStyleAsync();
+            // Start the process
+            await Invoke(async ()=> await UpdateStyleAsync(true));
             
+            var result = await StartApiRequestAsync();
+            if (!result)
+            {
+                _isLocked = false;
+                await Invoke(async ()=> await UpdateStyleAsync(false));
+                return; // TODO: Add error message 
+            }
+            _isRunning = true;
         }
+    }
+    
+    private async void _apiController_RequestFinished(object? sender, EventArgs e)
+    {
+        await Task.Delay(1000);
+        _isRunning = false;
         _isLocked = false;
+        await Invoke(async ()=> await UpdateStyleAsync(false));
     }
 
-    private async Task<bool> StartApiRequest()
-    {
-        var files = _fileQueueControl.FileContents;
-        if (files.Count == 0) return false;
-        
-        //We convert MiB to KiB.
-        var maximumFileSize = await GlobalSettings.SafeGetSettingAsync<int>(SettingKeys.MAX_FILE_SIZE) * 1024;
-        var filesToCompress = files.Where(x => x.Length / 1024 > maximumFileSize).ToList();
-        if (filesToCompress.Count == 0) return false;
+    private Task<bool> StartApiRequestAsync() => _apiController.StartProcessAsync(_fileQueueControl.FileContents);
 
-        // ImageCompressor accepts maximumFileSize in bits.
-        var imageCompressor = await ImageCompressor.CreateAsync(filesToCompress, maximumFileSize * 1024);
-        
-        imageCompressor.FileCompressed += (_, s) =>
-        {
-            Console.WriteLine($@"Compressed {s}");
-        };
-        //Copy files that need to be compressed to a temp directory.
-        var tempDirectory = await imageCompressor.CopyFilesToTempDirectoryAsync();
-
-        await imageCompressor.StartCompressionAsync();
-        
-        
-        //tempDirectory.Delete(true);
-        
-        
-        //throw new NotImplementedException();
-        return true;
-    }
-
-    private Task<bool> CancelApiRequest()
-    {
-        return Task.FromResult(true);
-    }
+    private Task CancelApiRequestAsync() => _apiController.CancelProcessAsync();
 }

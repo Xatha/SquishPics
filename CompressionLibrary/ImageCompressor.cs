@@ -8,7 +8,8 @@ namespace CompressionLibrary
         private List<FileInfo> _imageFiles;
         private readonly long _targetFileSize;
 
-        public event EventHandler<string> FileCompressed;
+        public event EventHandler<string>? FileCompressed;
+        
         private ImageCompressor(List<FileInfo> imageFiles, long targetFileSize)
         {
             _imageFiles = imageFiles;
@@ -134,24 +135,6 @@ namespace CompressionLibrary
                 graphics.DrawImage(image, 0, 0, newWidth, newHeight);
             }
             return Task.FromResult(newImage);
-        }
-
-        public Task<DirectoryInfo> CopyFilesToTempDirectoryAsync()
-        {
-            var tempDirectoryPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()); 
-            
-            var directory = Directory.CreateDirectory(tempDirectoryPath);
-            var imageFiles = _imageFiles.ToList();
-            _imageFiles.Clear();
-
-            Console.WriteLine($"Copying {imageFiles.Count} files to temp directory: {directory.FullName}.");
-            foreach (var imageFile in imageFiles)
-            {
-                var newFilePath = Path.Combine(directory.FullName, imageFile.Name);
-                File.Copy(imageFile.FullName, newFilePath);
-                _imageFiles.Add(new FileInfo(newFilePath));
-            }
-            return Task.FromResult(directory);
         }
 
         protected virtual void OnOnFileCompressed(string e)

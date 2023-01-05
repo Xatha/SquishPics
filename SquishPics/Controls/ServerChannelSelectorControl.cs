@@ -9,19 +9,20 @@ namespace SquishPics.Controls
         private readonly DiscordClient _client;
         private IReadOnlyCollection<RestGuild>? _guilds;
         private IEnumerable<SocketTextChannel>? _textChannels;
-
         
-        public RestGuild? SelectedGuild { get; private set; }
-        public SocketTextChannel? SelectedTextChannel { get; private set; }
-
+        //TODO: Technically this is a bad idea, but we will never have more than one instance of this control.
+        public static RestGuild?  SelectedServer { get; private set; }
+        public static SocketTextChannel? SelectedTextChannel { get; private set; }
+        
         public ServerChannelSelectorControl(DiscordClient client)
         {
             _client = client;
             InitializeComponent();
-            Task.Run(Initialize);
+            
+            Load += ServerChannelSelectorControl_Load;
         }
 
-        private async Task Initialize()
+        private async void ServerChannelSelectorControl_Load(object? sender, EventArgs e)
         {
             _guilds = await _client.GetServersAsync();
             if (_guilds is null) 
@@ -39,19 +40,20 @@ namespace SquishPics.Controls
                 
             Invoke(() => ServerListBox.Items.AddRange(_guilds.Select(guild => guild.Name).ToArray<object>()));
         }
-        
+
         private async void ServerListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             var selectedServer = ServerListBox.SelectedItem?.ToString();
-            if (selectedServer is null || selectedServer == SelectedGuild?.Name ) return;
+            if (selectedServer is null || selectedServer == SelectedServer?.Name ) return;
             
             SelectedTextChannel = null;
-            SelectedGuild = _guilds?.FirstOrDefault(guild => guild.Name == selectedServer);
-            if (SelectedGuild is null) return;
+            SelectedServer = _guilds?.FirstOrDefault(guild => guild.Name == selectedServer);
+            
+            if (SelectedServer is null) return;
 
-            _textChannels = await _client.GetChannelsAsync(SelectedGuild)!;
+            _textChannels = await _client.GetChannelsAsync(SelectedServer)!;
 
-            var textChannels = await _client.GetChannelsAsync(SelectedGuild)!;
+            var textChannels = await _client.GetChannelsAsync(SelectedServer);
             Invoke(() =>
             {
                 ChannelListBox.Items.Clear();
@@ -59,11 +61,11 @@ namespace SquishPics.Controls
             });
         }
 
-        private void ChannelListBox_SelectedIndexChanged(object sender, EventArgs e)
+        private async void ChannelListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             var selectedChannel = ChannelListBox.SelectedItem?.ToString();
             if (selectedChannel is null || selectedChannel == SelectedTextChannel?.Name) return;
-            SelectedTextChannel = _textChannels?.FirstOrDefault(textChannel => textChannel.Name == selectedChannel);
+            SelectedTextChannel = _textChannels?.FirstOrDefault(textChannel => textChannel.Name == selectedChannel); 
         }
     }
 }

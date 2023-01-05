@@ -60,30 +60,6 @@ namespace SquishPics {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SELECTED_SERVER {
-            get {
-                return ((string)(this["SELECTED_SERVER"]));
-            }
-            set {
-                this["SELECTED_SERVER"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SELECTED_CHANNEL {
-            get {
-                return ((string)(this["SELECTED_CHANNEL"]));
-            }
-            set {
-                this["SELECTED_CHANNEL"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int MAX_FILE_SIZE {
             get {

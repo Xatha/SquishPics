@@ -30,6 +30,10 @@
             var value = MaxFileSizeTextBox.Text.Length > 0
                 ? int.Parse(MaxFileSizeTextBox.Text)
                 : await GlobalSettings.SafeGetSettingAsync<int>(SettingKeys.MAX_FILE_SIZE);
+
+            //TODO: Make max and min a config?
+            if (value is < 6 or > 200) MaxFileSizeTextBox.Text = value < 6 ? "6" : "200";
+
             await GlobalSettings.SafeSetSettingAsync(SettingKeys.MAX_FILE_SIZE, value);
         }
         

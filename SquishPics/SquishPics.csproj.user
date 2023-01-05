@@ -10,9 +10,6 @@
     <Compile Update="Controls\FileQueueControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Controls\ServerChannelSelector.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="Controls\ServerChannelSelectorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
