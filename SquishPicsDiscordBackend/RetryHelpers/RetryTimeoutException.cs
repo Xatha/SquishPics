@@ -1,4 +1,4 @@
-namespace SquishPicsDiscordBackend.MessageService;
+namespace SquishPicsDiscordBackend.RetryHelpers;
 
 public class RetryTimeoutException : Exception
 {

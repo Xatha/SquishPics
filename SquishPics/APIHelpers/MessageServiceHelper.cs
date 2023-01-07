@@ -1,8 +1,8 @@
 using Discord;
-using Microsoft.VisualStudio.Threading;
 using SquishPics.Controls;
 using SquishPicsDiscordBackend;
 using SquishPicsDiscordBackend.MessageService;
+using SquishPicsDiscordBackend.RetryHelpers;
 using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace SquishPics.APIHelpers;
@@ -31,7 +31,7 @@ public sealed class MessageServiceHelper
         messages.ForEach(_messageQueue.Enqueue);
     }
     
-    public void StartQueueForget() => _messageQueue.StartSendingAsync().Forget();
+    public void StartQueueForget() => Task.Run(() => _messageQueue.StartSendingAsync()).ConfigureAwait(false);
     
     public async Task StopQueueAsync()
     {
@@ -66,7 +66,6 @@ public sealed class MessageServiceHelper
 
     private void OnMessageQueueStopped()
     {
-        Console.WriteLine("Message queue stopped. Invoke event");
         MessageQueueStopped?.Invoke(this, EventArgs.Empty);
     }
 }

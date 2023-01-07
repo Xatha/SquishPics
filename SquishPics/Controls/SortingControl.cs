@@ -13,6 +13,21 @@
             MaxFileSizeNUD.ValueChanged += MaxFileSizeNUD_ValueChanged;
         }
         
+        public event EventHandler? OnSelectedValueChanged
+        {
+            add 
+            { 
+                SortingModesComboBox.SelectedValueChanged += value;
+                SortingOrderComboBox.SelectedValueChanged += value;
+            }
+            remove
+            {
+                SortingModesComboBox.SelectedValueChanged -= value; 
+                SortingOrderComboBox.SelectedValueChanged -= value;
+            }
+        }
+
+
         private void InitializeSettings()
         {
             //TODO: Streamline on-first inits?
@@ -42,18 +57,5 @@
             await GlobalSettings.SafeSetSettingAsync(SettingKeys.SORTING_ORDER, SortingOrderComboBox.Text);
         }
 
-        public event EventHandler? OnSelectedValueChanged
-        {
-            add 
-            { 
-                SortingModesComboBox.SelectedValueChanged += value;
-                SortingOrderComboBox.SelectedValueChanged += value;
-            }
-            remove
-            {
-                SortingModesComboBox.SelectedValueChanged -= value; 
-                SortingOrderComboBox.SelectedValueChanged -= value;
-            }
-        }
     }
 }

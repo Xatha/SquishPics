@@ -3,11 +3,13 @@ using KeyboardHookManager;
 using SquishPics.APIHelpers;
 using SquishPics.Controllers;
 using SquishPicsDiscordBackend;
+using Task = System.Threading.Tasks.Task;
 
 namespace SquishPics
 {
     internal static class Program
     {
+        private static readonly DiscordClient _client = new(GlobalSettings.Default.API_KEY);
         [STAThread]
         private static void Main()
         {
@@ -15,13 +17,13 @@ namespace SquishPics
             // and it's not possible to disable this behavior.
             // Nevertheless I can not get WinForm's keyboard events to work on FileQueueControl,
             // so I will be using this but filtering out all keys except for the ones that is conducted in the program.
-            var thisModule = Assembly.GetEntryAssembly()?.ManifestModule.Assembly.GetModules().FirstOrDefault();
+            var thisModule = Assembly.GetExecutingAssembly().GetModules().FirstOrDefault();
             HookManager.Init(thisModule);
+            Console.WriteLine(thisModule?.Name);
             
-            var client = new DiscordClient(GlobalSettings.Default.API_KEY);
-            var messageServiceHelper = new MessageServiceHelper(client);
+            var messageServiceHelper = new MessageServiceHelper(_client);
             var compressionServiceHelper = new CompressionServiceHelper();
-            var controller = new ApiController(client, messageServiceHelper, compressionServiceHelper);
+            var controller = new ApiController(_client, messageServiceHelper, compressionServiceHelper);
             
             GlobalSettings.StartAutoSave(); 
             
@@ -29,9 +31,15 @@ namespace SquishPics
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.ThreadException += Application_ThreadException;
-            
-            Application.Run(new SquishPicsForm(client, controller));
-            
+            Application.ApplicationExit += async (_, _) => await Application_ApplicationExitAsync();
+            Application.Run(new SquishPicsForm(_client, controller));
+            Application.Exit();
+        }
+
+        private static async Task Application_ApplicationExitAsync()
+        {
+            Console.WriteLine("Application is exiting");
+            await _client.StopAsync();
             GlobalSettings.ForceSave();
             GlobalSettings.StopAutoSave();
         }

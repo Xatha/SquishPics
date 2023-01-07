@@ -4,7 +4,7 @@ using SquishPicsDiscordBackend;
 
 namespace SquishPics;
 
-public sealed class ControlsContainer
+public sealed class ControlsContainer : IDisposable
 {
     private readonly Form _form;
     private readonly SortingControl _sortingControl;
@@ -76,5 +76,15 @@ public sealed class ControlsContainer
         _form.Controls.Add(_startStopButtonControl);
         _form.Controls.Add(_serverChannelSelectorControl);
         return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        _sortingControl.Dispose();
+        _fileQueueControl.Dispose();
+        _connectingControl.Dispose();
+        _startStopButtonControl.Dispose();
+        _serverChannelSelectorControl.Dispose();
+        
     }
 }

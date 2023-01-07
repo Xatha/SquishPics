@@ -45,7 +45,7 @@ public partial class StartStopButtonControl : UserControl
         
         await Invoke(async () => await UpdateStyleAsync(true));
 
-        if (await _apiController.StartProcessAsync(_fileQueueControl.FileContents))
+        if (await _apiController.StartProcessAsync(_fileQueueControl.Items))
         {
             _isRunning = true;
         }
@@ -71,7 +71,7 @@ public partial class StartStopButtonControl : UserControl
             return false;
         }
 
-        if (_fileQueueControl.FileContents.Count <= 0)
+        if (_fileQueueControl.Items.Count <= 0)
         {
             await StandardResponses.NoFilesSelectedAsync();
             _isLocked = false;

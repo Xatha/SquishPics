@@ -56,6 +56,17 @@ public partial class ConnectingControl : UserControl
         }
         await _discordClient.RetryLoginAsync(key);
     }
+    
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            components?.Dispose(); 
+            _discordClient.OnConnected -= discordClient_OnConnected;
+            _discordClient.OnDisconnected -= _discordClient_OnDisconnected;
+        }
+        base.Dispose(disposing);
+    }
 
     private enum State
     {

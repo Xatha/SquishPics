@@ -1,6 +1,7 @@
 ﻿using Discord.Rest;
 using Discord.WebSocket;
 using SquishPicsDiscordBackend;
+using SquishPicsDiscordBackend.RetryHelpers;
 
 namespace SquishPics.Controls
 {
@@ -20,35 +21,59 @@ namespace SquishPics.Controls
             InitializeComponent();
             
             Load += ServerChannelSelectorControl_Load;
+            _client.OnConnected += ClientOnOnConnectedAsync;
+            _client.OnDisconnected += ClientOnOnDisconnectedAsync; 
         }
+
+        private Task ClientOnOnDisconnectedAsync(Exception arg)
+        {
+            _guilds = null;
+            _textChannels = null;
+            SelectedServer = null;
+            SelectedTextChannel = null;
+            Invoke(() =>
+                {
+                    ChannelListBox.Items.Clear();
+                    ServerListBox.Items.Clear();
+                });
+            return Task.CompletedTask;
+        }
+
+        private async Task ClientOnOnConnectedAsync() => await LoadServersAndChannelsAsync();
 
         private async void ServerChannelSelectorControl_Load(object? sender, EventArgs e)
         {
-            _guilds = await _client.GetServersAsync();
-            if (_guilds is null) 
+            try
             {
-                Console.WriteLine(@"No guilds found. Retrying...");
-                await Task.Delay(2000); // Retry in 2 seconds
-                _guilds = await _client.GetServersAsync();
+                await LoadServersAsync().RetryAsync(3, TimeSpan.FromSeconds(3));
             }
-            if (_guilds is null) 
+            catch (RetryTimeoutException exception)
             {
-                var buttons = MessageBoxButtons.YesNo;
-                Invoke( ()=> MessageBox.Show(@"Failed to get guilds from Discord API. Please try again later.", @"Error", buttons));
-                return; // Still null, give up TODO: Add better error.
+                const MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                Invoke( ()=> MessageBox.Show($"Failed to get guilds from Discord API. Please try again later.\n {exception}", @"Error", buttons));
             }
-                
-            Invoke(() => ServerListBox.Items.AddRange(_guilds.Select(guild => guild.Name).ToArray<object>()));
         }
 
         private async void ServerListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            await LoadChannelsAsync();
+        }
+
+        private async Task LoadServersAsync()
+        {
+            _guilds = await _client.GetServersAsync();
+            if (_guilds is null) throw new InvalidOperationException("Could not retrieve discord servers.");
+            Invoke(() => ServerListBox.Items.AddRange(_guilds.Select(guild => guild.Name).ToArray<object>()));
+        }
+        
+        private async Task LoadChannelsAsync()
+        {
             var selectedServer = ServerListBox.SelectedItem?.ToString();
-            if (selectedServer is null || selectedServer == SelectedServer?.Name ) return;
-            
+            if (selectedServer is null || selectedServer == SelectedServer?.Name) return;
+
             SelectedTextChannel = null;
             SelectedServer = _guilds?.FirstOrDefault(guild => guild.Name == selectedServer);
-            
+
             if (SelectedServer is null) return;
 
             _textChannels = await _client.GetChannelsAsync(SelectedServer)!;
@@ -61,11 +86,28 @@ namespace SquishPics.Controls
             });
         }
 
-        private async void ChannelListBox_SelectedIndexChanged(object sender, EventArgs e)
+        private async Task LoadServersAndChannelsAsync()
+        {
+            if (_guilds is null) await LoadServersAsync();
+            if (_textChannels is null) await LoadChannelsAsync();
+        }
+
+        private void ChannelListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             var selectedChannel = ChannelListBox.SelectedItem?.ToString();
             if (selectedChannel is null || selectedChannel == SelectedTextChannel?.Name) return;
             SelectedTextChannel = _textChannels?.FirstOrDefault(textChannel => textChannel.Name == selectedChannel); 
+        }
+        
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                components?.Dispose();
+                _client.OnConnected -= ClientOnOnConnectedAsync;
+                _client.OnDisconnected -= ClientOnOnDisconnectedAsync;
+            }
+            base.Dispose(disposing);
         }
     }
 }
