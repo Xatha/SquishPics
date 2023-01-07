@@ -1,3 +1,5 @@
+using Discord.Rest;
+using Discord.WebSocket;
 using SquishPics.Controllers;
 
 namespace SquishPics.Controls;
@@ -26,92 +28,93 @@ public partial class StartStopButtonControl : UserControl
     {
         if (isRunning)
         {
-            Console.WriteLine("Red  ");
             StartStopButton.BackColor = Color.IndianRed;
             StartStopButton.Text = @"Stop Process";
         }
         else
         {
-            Console.WriteLine("Green");
             StartStopButton.BackColor = Color.PaleGreen;
             StartStopButton.Text = @"Start Process";
         }
         return Task.CompletedTask;
     }
     
-    private async void StartStopButton_Click(object? sender, EventArgs e)
+    private async Task StartRequestAsync()
     {
-        // We lock the button since we don't want the user to be able to spam the button or click it while it's processing a request.
-        if (_isLocked) return;
+        if (!await ValidateStateAsync()) return;
+        
+        await Invoke(async () => await UpdateStyleAsync(true));
 
-        _isLocked = true;
-        if (_isRunning)
+        if (await _apiController.StartProcessAsync(_fileQueueControl.FileContents))
         {
-            // Stop the process
-            await CancelApiRequestAsync();
-            /*var result = await CancelApiRequestAsync();
-            if (!result) return; //TODO: Add exception/blowup.*/
-            
-            _isRunning = false;
-            _isLocked = false;
-            await Invoke(async ()=> await UpdateStyleAsync(false));
+            _isRunning = true;
         }
         else
         {
-            var server = ServerChannelSelectorControl.SelectedServer;
-            var channel =  ServerChannelSelectorControl.SelectedTextChannel;
-            
-            if (_fileQueueControl.FileContents.Count <= 0)
-            {
-                MessageBox.Show(@"Please select files to send.");
-                _isLocked = false;
-                return;
-            }
-            
-            if (server == null || channel == null)
-            {
-                MessageBox.Show(@"Please select a server and channel.");
-                _isLocked = false;
-                return;
-            }
-            
-            
-            
-            
-            
-            
-            if (MessageBox.Show(
-                    $"Do you want to begin posting images> Images will be send in:\nServer: {server.Name}\nChannel: {channel.Name}",
-                    @"Start Process?", MessageBoxButtons.YesNo) ==
-                DialogResult.No)
-            {
-                _isLocked = false;
-                return;
-            }
-            // If the request was successful, we start the process.
-            // Start the process
-            await Invoke(async ()=> await UpdateStyleAsync(true));
-            
-            var result = await StartApiRequestAsync();
-            if (!result)
-            {
-                _isLocked = false;
-                await Invoke(async ()=> await UpdateStyleAsync(false));
-                return; // TODO: Add error message 
-            }
-            _isRunning = true;
+            await Invoke(async () => await UpdateStyleAsync(false));
         }
     }
+
+    private async Task CancelApiRequestAsync()
+    {
+        await Invoke(async () => await UpdateStyleAsync(false));
+        _isRunning = false;
+        await _apiController.CancelProcessAsync();
+    } 
+    private async Task<bool> ValidateStateAsync()
+    {
+        
+        if (!_apiController.HasConnection)
+        {
+            await StandardResponses.NoConnectionAsync();
+            _isLocked = false;
+            return false;
+        }
+
+        if (_fileQueueControl.FileContents.Count <= 0)
+        {
+            await StandardResponses.NoFilesSelectedAsync();
+            _isLocked = false;
+            return false;
+        }
+
+        var server = ServerChannelSelectorControl.SelectedServer;
+        var channel =  ServerChannelSelectorControl.SelectedTextChannel;
+        if (server == null || channel == null)
+        {
+            await StandardResponses.NoChannelSelectedAsync();
+            _isLocked = false;
+            return false;
+        }
+
+        if (await StandardResponses.ConfirmationAsync(server.Name, channel.Name))
+        {
+            _isLocked = false;
+            return false;
+        }
+        return true;
+    }
     
+    private async void StartStopButton_Click(object? sender, EventArgs e)
+    {
+        if (_isLocked) return;
+        _isLocked = true;
+        if (_isRunning)
+        { 
+            await CancelApiRequestAsync();
+        }
+        else
+        {
+            await StartRequestAsync();
+        }
+        await Task.Delay(200);
+        _isLocked = false;
+    }
+
     private async void _apiController_RequestFinished(object? sender, EventArgs e)
     {
         await Task.Delay(1000);
+        await Invoke(async () => await UpdateStyleAsync(false));
         _isRunning = false;
-        _isLocked = false;
-        await Invoke(async ()=> await UpdateStyleAsync(false));
     }
-
-    private Task<bool> StartApiRequestAsync() => _apiController.StartProcessAsync(_fileQueueControl.FileContents);
-
-    private Task CancelApiRequestAsync() => _apiController.CancelProcessAsync();
 }

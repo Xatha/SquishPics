@@ -181,6 +181,10 @@
         "net7.0-windows7.0": {
           "targetAlias": "net7.0-windows",
           "dependencies": {
+            "KeyboardHookManager": {
+              "target": "Package",
+              "version": "[1.1.0, )"
+            },
             "Microsoft.VisualStudio.Threading": {
               "target": "Package",
               "version": "[17.4.33, )"

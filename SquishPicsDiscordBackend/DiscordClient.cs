@@ -8,6 +8,8 @@ public class DiscordClient
 {
     private readonly DiscordSocketClient _socketClient;
 
+    public ConnectionState ConnectionState { get; set; }
+
     public DiscordClient(string APIKey)
     {
         var config = new DiscordSocketConfig
@@ -20,6 +22,9 @@ public class DiscordClient
 
         _socketClient.LoginAsync(TokenType.Bot, APIKey);
         _socketClient.StartAsync();
+        
+        _socketClient.Connected += () => Task.FromResult(ConnectionState = ConnectionState.Connected);
+        _socketClient.Disconnected += (e) => Task.FromResult(ConnectionState = ConnectionState.Disconnected);
     }
 
     public event Func<Task> OnConnected
@@ -40,6 +45,11 @@ public class DiscordClient
         Console.WriteLine("Retry");
         await _socketClient.LoginAsync(TokenType.Bot, APIKey);
         await _socketClient.StartAsync();
+    }
+    
+    public async Task StopAsync()
+    {
+        await _socketClient.StopAsync();
     }
     
     public Task<IReadOnlyCollection<RestGuild>> GetServersAsync() => _socketClient.Rest.GetGuildsAsync();

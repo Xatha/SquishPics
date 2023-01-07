@@ -4,6 +4,9 @@
     <Compile Update="Controls\APIKeyForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Controls\CleanNumericUpDown.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="Controls\ConnectingControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

@@ -119,6 +119,15 @@
           }
         }
       },
+      "KeyboardHookManager/1.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/KeyboardHookManager.dll": {}
+        },
+        "runtime": {
+          "lib/KeyboardHookManager.dll": {}
+        }
+      },
       "Microsoft.Bcl.AsyncInterfaces/6.0.0": {
         "type": "package",
         "compile": {
@@ -651,6 +660,18 @@
         "lib/netstandard2.0/Discord.Net.WebSocket.xml",
         "lib/netstandard2.1/Discord.Net.WebSocket.dll",
         "lib/netstandard2.1/Discord.Net.WebSocket.xml"
+      ]
+    },
+    "KeyboardHookManager/1.1.0": {
+      "sha512": "CVRX1UW7tHNghlUvnDN4w60yanQ011mck4NoDKxz8/yd2O33IteGoS5spvYUDHQ/cOj83KrRK0ifDFenA1Neig==",
+      "type": "package",
+      "path": "keyboardhookmanager/1.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "keyboardhookmanager.1.1.0.nupkg.sha512",
+        "keyboardhookmanager.nuspec",
+        "lib/KeyboardHookManager.dll"
       ]
     },
     "Microsoft.Bcl.AsyncInterfaces/6.0.0": {
@@ -1319,6 +1340,7 @@
   "projectFileDependencyGroups": {
     "net7.0-windows7.0": [
       "CompressionLibrary >= 1.0.0",
+      "KeyboardHookManager >= 1.1.0",
       "Microsoft.VisualStudio.Threading >= 17.4.33",
       "SquishPicsDiscordBackend >= 1.0.0"
     ]
@@ -1374,6 +1396,10 @@
       "net7.0-windows7.0": {
         "targetAlias": "net7.0-windows",
         "dependencies": {
+          "KeyboardHookManager": {
+            "target": "Package",
+            "version": "[1.1.0, )"
+          },
           "Microsoft.VisualStudio.Threading": {
             "target": "Package",
             "version": "[17.4.33, )"
@@ -1401,5 +1427,17 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'KeyboardHookManager 1.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0-windows7.0'. This package may not be fully compatible with your project.",
+      "libraryId": "KeyboardHookManager",
+      "targetGraphs": [
+        "net7.0-windows7.0"
+      ]
+    }
+  ]
 }

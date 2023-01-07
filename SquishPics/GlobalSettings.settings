@@ -12,7 +12,7 @@
       <Value Profile="(Default)">Ascending</Value>
     </Setting>
     <Setting Name="MAX_FILE_SIZE" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">8</Value>
     </Setting>
     <Setting Name="LAST_VISITED_DIRECTORY_DIALOGUE" Type="System.String" Scope="User">
       <Value Profile="(Default)" />

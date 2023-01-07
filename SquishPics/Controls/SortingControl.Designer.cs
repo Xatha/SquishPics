@@ -33,6 +33,8 @@
             this.SortingModesComboBox = new System.Windows.Forms.ComboBox();
             this.MaxFileSizeTextBox = new System.Windows.Forms.TextBox();
             this.MaxFileSizeLabel = new System.Windows.Forms.Label();
+            this.MaxFileSizeNUD = new CleanNumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)(this.MaxFileSizeNUD)).BeginInit();
             this.SuspendLayout();
             // 
             // SortingOrderComboBox
@@ -92,10 +94,22 @@
             this.MaxFileSizeLabel.TabIndex = 22;
             this.MaxFileSizeLabel.Text = "Max File Size (MB)";
             // 
+            // MaxFileSizeNUD
+            // 
+            this.MaxFileSizeNUD.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.MaxFileSizeNUD.Location = new System.Drawing.Point(205, 18);
+            this.MaxFileSizeNUD.Maximum = 200;
+            this.MaxFileSizeNUD.Minimum = 7;
+            this.MaxFileSizeNUD.Name = "MaxFileSizeNUD";
+            this.MaxFileSizeNUD.Size = new System.Drawing.Size(103, 23);
+            this.MaxFileSizeNUD.TabIndex = 23;
+            this.MaxFileSizeNUD.Value = 7;
+            // 
             // SortingControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.MaxFileSizeNUD);
             this.Controls.Add(this.MaxFileSizeLabel);
             this.Controls.Add(this.MaxFileSizeTextBox);
             this.Controls.Add(this.SortingOrderComboBox);
@@ -103,9 +117,9 @@
             this.Controls.Add(this.SortingModesComboBox);
             this.Name = "SortingControl";
             this.Size = new System.Drawing.Size(310, 42);
+            ((System.ComponentModel.ISupportInitialize)(this.MaxFileSizeNUD)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
@@ -115,5 +129,6 @@
         private ComboBox SortingModesComboBox;
         private TextBox MaxFileSizeTextBox;
         private Label MaxFileSizeLabel;
+        private CleanNumericUpDown MaxFileSizeNUD;
     }
 }

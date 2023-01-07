@@ -67,3 +67,4 @@ C:\Users\Luca\source\repos\SquishPics\SquishPics\bin\Debug\net7.0-windows\ru\Mic
 C:\Users\Luca\source\repos\SquishPics\SquishPics\bin\Debug\net7.0-windows\tr\Microsoft.VisualStudio.Validation.resources.dll
 C:\Users\Luca\source\repos\SquishPics\SquishPics\bin\Debug\net7.0-windows\zh-Hans\Microsoft.VisualStudio.Validation.resources.dll
 C:\Users\Luca\source\repos\SquishPics\SquishPics\bin\Debug\net7.0-windows\zh-Hant\Microsoft.VisualStudio.Validation.resources.dll
+C:\Users\Luca\source\repos\SquishPics\SquishPics\bin\Debug\net7.0-windows\KeyboardHookManager.dll

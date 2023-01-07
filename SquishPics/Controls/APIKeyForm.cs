@@ -5,6 +5,7 @@
         public APIKeyForm()
         {
             InitializeComponent();
+            MaximizeBox = false;
         }
 
         private async void APIKeyForm_Load(object sender, EventArgs e) =>

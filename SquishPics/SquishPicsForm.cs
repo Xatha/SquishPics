@@ -12,6 +12,7 @@ public partial class SquishPicsForm : Form
 
     public SquishPicsForm(DiscordClient client, ApiController apiController)
     {
+        KeyPreview = false;
         _apiKeyForm = new APIKeyForm();
         _client = client;
         _apiController = apiController;
@@ -22,9 +23,10 @@ public partial class SquishPicsForm : Form
         ExceptionButton.Click += ExceptionButton_Click;
     }
 
-    private void ExceptionButton_Click(object? sender, EventArgs e)
+    private async void ExceptionButton_Click(object? sender, EventArgs e)
     {
-        throw new Exception("Test Exception");
+        await _client.StopAsync();
+        //throw new Exception("Test Exception");
     }
 
     //TODO: Move these propagated events to a separate class
@@ -38,7 +40,7 @@ public partial class SquishPicsForm : Form
         if (_apiKeyForm.Visible && Enabled) Enabled = false;
 
         if (_apiKeyForm.Visible) return;
-        _apiKeyForm.Location = new Point(Location.X + 40, Location.Y + 40);
+        _apiKeyForm.Location = new Point(Location.X + Width/2 - _apiKeyForm.Width/2, Location.Y + Height/2 - _apiKeyForm.Height/2);
         _apiKeyForm.Show();
         _apiKeyForm.Focus();
     }

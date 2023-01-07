@@ -60,7 +60,7 @@ namespace SquishPics {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("8")]
         public int MAX_FILE_SIZE {
             get {
                 return ((int)(this["MAX_FILE_SIZE"]));

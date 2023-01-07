@@ -3,53 +3,49 @@ using Microsoft.VisualStudio.Threading;
 using SquishPics.Controls;
 using SquishPicsDiscordBackend;
 using SquishPicsDiscordBackend.MessageService;
+using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace SquishPics.APIHelpers;
 
-public class MessageServiceHelper
+public sealed class MessageServiceHelper
 {
     private readonly DiscordClient _client;
-    public MessageQueue? MessageQueue { get; private set; }
-
-    public event EventHandler? MessageQueueStarted;
-    public event EventHandler? MessageQueuePause;
+    private readonly MessageQueue _messageQueue;
     public event EventHandler? MessageQueueStopped;
     
     public MessageServiceHelper(DiscordClient client)
     {
         _client = client;
+        _messageQueue = new MessageQueue(client);
+        _messageQueue.Finished += MessageQueue_Finished;
+        _messageQueue.Failed += MessageQueue_Failed;
     }
-    
+
     //TODO: Add link posting support.
     public async Task SetupQueueAsync(IEnumerable<string> filePaths)
     {
-        if (MessageQueue != null) throw new Exception("Current queue is not finished.");
-        
+        if (!_messageQueue.IsEmpty) throw new InvalidOperationException("The queue is not emptied yet.");
+
         var selectedMessageChannel = await GetSelectedMessageChannelAsync();
-        var messages = filePaths.Select(path => new AttachmentMessage(path, selectedMessageChannel));
-        MessageQueue = new MessageQueue(messages);
-        
-        MessageQueue.Finished += (_, _) =>
-        {
-            MessageQueue = null;
-            OnMessageQueueStopped();
-        };
+        var messages = filePaths.Select(path => new AttachmentMessage(path, selectedMessageChannel)).ToList();
+        messages.ForEach(_messageQueue.Enqueue);
     }
-
-    //TODO: Add better error handling.
-    public void StartQueueForget() => MessageQueue?.StartSendingAsync().Forget();
-
-    public async Task PauseQueueAsync()
-    {
-        if (MessageQueue is null) throw new Exception("Message queue is not initialized.");
-        await MessageQueue.StopSendingAsync();
-        OnMessageQueuePause();
-    }
-
+    
+    public void StartQueueForget() => _messageQueue.StartSendingAsync().Forget();
+    
     public async Task StopQueueAsync()
     {
-        if (MessageQueue is null) throw new Exception("Message queue is not initialized.");
-        await MessageQueue.StopSendingAsync();
+        await _messageQueue.StopSendingAsync(); 
+        _messageQueue.Clear();
+    }
+    
+    private void MessageQueue_Finished(object? o, EventArgs eventArgs) => OnMessageQueueStopped();
+
+    //TODO: Add logging.
+    private void MessageQueue_Failed(object? o, RetryTimeoutException retryTimeoutException)
+    {
+        MessageBox.Show(@"Failed to send message. This is likely because the application could not establish connecting to Discord for a prolonged period.",
+            @"Error - Failed to send messages.", MessageBoxButtons.OK, MessageBoxIcon.Error);
         OnMessageQueueStopped();
     }
 
@@ -59,27 +55,18 @@ public class MessageServiceHelper
         var selectedChannel = ServerChannelSelectorControl.SelectedTextChannel;
         
         if (selectedServer is null || selectedChannel is null)
-            throw new Exception("Server or channel is not selected.");
+            throw new NullReferenceException("Server or channel is not selected.");
         
         var server  = (await _client.GetServersAsync()).FirstOrDefault(server => server.Name == selectedServer.Name);
-        if (server == null) throw new Exception("Server not found."); //TODO: Proper exception.
+        if (server == null) throw new NullReferenceException("Server not found."); //TODO: Proper exception.
 
         var messageChannel = (await _client.GetChannelsAsync(server)).FirstOrDefault(messageChannel => messageChannel.Name == selectedChannel.Name);
-        return messageChannel ?? throw new Exception("Channel not found."); //TODO: Proper exception.
+        return messageChannel ?? throw new NullReferenceException("Channel not found."); //TODO: Proper exception.
     }
 
-    protected virtual void OnMessageQueueStarted()
+    private void OnMessageQueueStopped()
     {
-        MessageQueueStarted?.Invoke(this, EventArgs.Empty);
-    }
-    
-    protected virtual void OnMessageQueuePause()
-    {
-        MessageQueuePause?.Invoke(this, EventArgs.Empty);
-    }
-    
-    protected virtual void OnMessageQueueStopped()
-    {
+        Console.WriteLine("Message queue stopped. Invoke event");
         MessageQueueStopped?.Invoke(this, EventArgs.Empty);
     }
 }
