@@ -5,30 +5,38 @@ namespace SquishPics.Controllers;
 
 public sealed class ApiController
 {
-    private readonly DiscordClient _discordClient;
     private readonly CompressionServiceHelper _compressionServiceHelper;
+    private readonly DiscordClient _discordClient;
     private readonly MessageServiceHelper _messageServiceHelper;
     private DirectoryInfo? _directoryInfo;
     private bool _handlingRequest;
-    
-    public bool HasConnection { get; set; }
-    public event EventHandler? RequestFinished;
-    
-    public ApiController(DiscordClient client, MessageServiceHelper messageServiceHelper, CompressionServiceHelper compressionServiceHelper)
+
+    public ApiController(DiscordClient client, MessageServiceHelper messageServiceHelper,
+        CompressionServiceHelper compressionServiceHelper)
     {
         _discordClient = client;
         _messageServiceHelper = messageServiceHelper;
         _compressionServiceHelper = compressionServiceHelper;
-        
+
         _compressionServiceHelper.FileCompressed += CompressionServiceHelperOnFileCompressed;
         _messageServiceHelper.MessageQueueStopped += MessageServiceHelperOnMessageQueueStopped;
-        
+
         _discordClient.OnConnected += DiscordClientConnectionConnected;
         _discordClient.OnDisconnected += DiscordClientConnectionDisconnected;
     }
 
-    private Task DiscordClientConnectionConnected() => Task.FromResult(HasConnection = true);
-    private Task DiscordClientConnectionDisconnected(Exception exception) => Task.FromResult(HasConnection = false);
+    public bool HasConnection { get; set; }
+    public event EventHandler? RequestFinished;
+
+    private Task DiscordClientConnectionConnected()
+    {
+        return Task.FromResult(HasConnection = true);
+    }
+
+    private Task DiscordClientConnectionDisconnected(Exception exception)
+    {
+        return Task.FromResult(HasConnection = false);
+    }
 
     //TODO: Fix firing of event twice.
     private void MessageServiceHelperOnMessageQueueStopped(object? sender, EventArgs e)
@@ -58,11 +66,15 @@ public sealed class ApiController
             Console.WriteLine(e);
             return false;
         }
+
         _messageServiceHelper.StartQueueForget();
         return true;
     }
-    
-    public Task CancelProcessAsync() => _messageServiceHelper.StopQueueAsync();
+
+    public Task CancelProcessAsync()
+    {
+        return _messageServiceHelper.StopQueueAsync();
+    }
 
     private async Task<List<FileInfo>> CompressFilesAsync(IEnumerable<FileInfo> files, List<FileInfo> filesToProcess,
         int maxFileSizeInBytes)
@@ -75,12 +87,12 @@ public sealed class ApiController
         //Some of our files have been copied to a new location, so we need to update the list.
         return files.Select(file => filesToProcess.Find(info => file.Name == info.Name) ?? file).ToList();
     }
-    
+
     private Task<(DirectoryInfo, List<FileInfo>)> CopyFilesToTempDirectoryAsync(List<FileInfo> files)
     {
         var tempDirectoryPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         var directory = Directory.CreateDirectory(tempDirectoryPath);
-        
+
         //TODO: CW
         Console.WriteLine($@"Copying {files.Count} files to temp directory: {directory.FullName}.");
 
@@ -91,9 +103,10 @@ public sealed class ApiController
             File.Copy(file.FullName, newFilePath);
             result.Add(new FileInfo(newFilePath));
         }
+
         return Task.FromResult((directory, result));
     }
-    
+
     private void CompressionServiceHelperOnFileCompressed(object? sender, string e)
     {
         Console.WriteLine(@$"File compressed: {e}");

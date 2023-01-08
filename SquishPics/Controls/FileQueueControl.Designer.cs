@@ -23,9 +23,9 @@
             this.SizeHeader = new System.Windows.Forms.ColumnHeader();
             this.DateModifiedHeader = new System.Windows.Forms.ColumnHeader();
             this.TypeHeader = new System.Windows.Forms.ColumnHeader();
-            this.ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.RemoveImageContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ContextMenuStrip.SuspendLayout();
+            this.RemoveImageContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // ClearQueueButton
@@ -82,10 +82,10 @@
             // 
             // ContextMenuStrip
             // 
-            this.ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.RemoveImageContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.removeToolStripMenuItem});
-            this.ContextMenuStrip.Name = "contextMenuStrip1";
-            this.ContextMenuStrip.Size = new System.Drawing.Size(181, 48);
+            this.RemoveImageContextMenuStrip.Name = "contextMenuStrip1";
+            this.RemoveImageContextMenuStrip.Size = new System.Drawing.Size(181, 48);
             // 
             // removeToolStripMenuItem
             // 
@@ -102,7 +102,7 @@
             this.Controls.Add(this.ImportFilesButton);
             this.Name = "FileQueueControl";
             this.Size = new System.Drawing.Size(308, 338);
-            this.ContextMenuStrip.ResumeLayout(false);
+            this.RemoveImageContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -115,7 +115,7 @@
         private ColumnHeader SizeHeader;
         private ColumnHeader DateModifiedHeader;
         private ColumnHeader TypeHeader;
-        private ContextMenuStrip ContextMenuStrip;
+        private ContextMenuStrip RemoveImageContextMenuStrip;
         private ToolStripMenuItem removeToolStripMenuItem;
     }
 }

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using SquishPics.Controllers;
 using SquishPics.Controls;
+using SquishPics.Hooks;
 using SquishPicsDiscordBackend;
 
 namespace SquishPics;
@@ -11,18 +12,18 @@ public partial class SquishPicsForm : Form
     private readonly DiscordClient _client;
     private readonly ControlsContainer _controls;
 
-    public SquishPicsForm(DiscordClient client, ApiController apiController)
+    public SquishPicsForm(DiscordClient client, ApiController apiController, GlobalKeyboardHook keyboardHook)
     {
         KeyPreview = false;
         _apiKeyForm = new APIKeyForm();
         _client = client;
-        _controls = new ControlsContainer(this, _client, apiController);
+        _controls = new ControlsContainer(this, _client, apiController, keyboardHook);
         InitializeComponent();
-        
+
         _apiKeyForm.VisibleChanged += APIKeyForm_VisibleChanged;
         ApiKeyButton.Click += ApiKeyButton_Click;
         ExceptionButton.Click += ExceptionButton_Click;
-        this.Closing += SquishPicsForm_Closing;
+        Closing += SquishPicsForm_Closing;
     }
 
     private void SquishPicsForm_Closing(object? sender, CancelEventArgs e)
@@ -33,8 +34,8 @@ public partial class SquishPicsForm : Form
 
     private async void ExceptionButton_Click(object? sender, EventArgs e)
     {
-        await _client.StopAsync();
-        //throw new Exception("Test Exception");
+        //await _client.StopAsync();
+        throw new Exception("Test Exception");
     }
 
     //TODO: Move these propagated events to a separate class
@@ -48,11 +49,12 @@ public partial class SquishPicsForm : Form
         if (_apiKeyForm.Visible && Enabled) Enabled = false;
 
         if (_apiKeyForm.Visible) return;
-        _apiKeyForm.Location = new Point(Location.X + Width/2 - _apiKeyForm.Width/2, Location.Y + Height/2 - _apiKeyForm.Height/2);
+        _apiKeyForm.Location = new Point(Location.X + Width / 2 - _apiKeyForm.Width / 2,
+            Location.Y + Height / 2 - _apiKeyForm.Height / 2);
         _apiKeyForm.Show();
         _apiKeyForm.Focus();
     }
-    
+
     private void APIKeyForm_VisibleChanged(object? sender, EventArgs e)
     {
         if (Visible && Enabled)
@@ -60,6 +62,7 @@ public partial class SquishPicsForm : Form
             Enabled = false;
             return;
         }
+
         Enabled = true;
     }
 }

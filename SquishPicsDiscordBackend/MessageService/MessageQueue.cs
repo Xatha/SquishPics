@@ -6,17 +6,17 @@ namespace SquishPicsDiscordBackend.MessageService;
 
 public sealed class MessageQueue : ConcurrentQueue<IMessage>
 {
-    private const int MessageMillisecondDelay = 1000; 
+    private const int MessageMillisecondDelay = 1000;
     private readonly DiscordClient _client;
     private bool _isRunning;
-
-    public event EventHandler? Finished;
-    public event EventHandler<RetryTimeoutException>? Failed;
 
     public MessageQueue(DiscordClient client)
     {
         _client = client;
     }
+
+    public event EventHandler? Finished;
+    public event EventHandler<RetryTimeoutException>? Failed;
 
     //TODO: Handle on disconnect from server.
     public async Task StartSendingAsync()
@@ -34,6 +34,7 @@ public sealed class MessageQueue : ConcurrentQueue<IMessage>
                 OnFailed(e);
                 return;
             }
+
             await Task.Delay(MessageMillisecondDelay);
         }
 
@@ -56,13 +57,21 @@ public sealed class MessageQueue : ConcurrentQueue<IMessage>
                 await Task.Delay(waitTime);
                 continue;
             }
+
             await message.SendAsync();
             return;
         }
+
         throw new RetryTimeoutException($"Failed to send message after {maxRetries} attempts.");
     }
-    
-    private void OnFinished() => Finished?.Invoke(this, EventArgs.Empty);
 
-    private void OnFailed(RetryTimeoutException e) => Failed?.Invoke(this, e);
+    private void OnFinished()
+    {
+        Finished?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnFailed(RetryTimeoutException e)
+    {
+        Failed?.Invoke(this, e);
+    }
 }

@@ -1,33 +1,44 @@
 using SquishPics.Controllers;
 using SquishPics.Controls;
+using SquishPics.Hooks;
 using SquishPicsDiscordBackend;
 
 namespace SquishPics;
 
 public sealed class ControlsContainer : IDisposable
 {
-    private readonly Form _form;
-    private readonly SortingControl _sortingControl;
-    private readonly FileQueueControl _fileQueueControl;
     private readonly ConnectingControl _connectingControl;
-    private readonly StartStopButtonControl _startStopButtonControl;
+    private readonly FileQueueControl _fileQueueControl;
+    private readonly Form _form;
     private readonly ServerChannelSelectorControl _serverChannelSelectorControl;
+    private readonly SortingControl _sortingControl;
+    private readonly StartStopButtonControl _startStopButtonControl;
 
-    public ControlsContainer(Form form, DiscordClient client, ApiController apiController)
+    public ControlsContainer(Form form, DiscordClient client, ApiController apiController,
+        GlobalKeyboardHook keyboardHook)
     {
         _form = form;
         _sortingControl = new SortingControl();
-        _fileQueueControl = new FileQueueControl(_sortingControl);
+        _fileQueueControl = new FileQueueControl(_sortingControl, keyboardHook);
         _connectingControl = new ConnectingControl(client);
         _startStopButtonControl = new StartStopButtonControl(apiController, _fileQueueControl);
         _serverChannelSelectorControl = new ServerChannelSelectorControl(client);
     }
 
+    public void Dispose()
+    {
+        _sortingControl.Dispose();
+        _fileQueueControl.Dispose();
+        _connectingControl.Dispose();
+        _startStopButtonControl.Dispose();
+        _serverChannelSelectorControl.Dispose();
+    }
+
     public async Task InitializeControlsAsync()
     {
         // fileQueueControl
-        _fileQueueControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom 
-                                                    | AnchorStyles.Left 
+        _fileQueueControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom
+                                                    | AnchorStyles.Left
                                                     | AnchorStyles.Right;
         _fileQueueControl.AutoSize = true;
         _fileQueueControl.AutoSizeMode = AutoSizeMode.GrowAndShrink;
@@ -36,14 +47,14 @@ public sealed class ControlsContainer : IDisposable
         _fileQueueControl.Size = new Size(309, 339);
         _fileQueueControl.TabIndex = 19;
         _fileQueueControl.DoubleBuffered(true);
-        
+
         // sortingControl
         _sortingControl.Anchor = AnchorStyles.Right;
         _sortingControl.Location = new Point(324, 38);
         _sortingControl.Name = "sortingControl";
         _sortingControl.Size = new Size(310, 42);
         _sortingControl.TabIndex = 20;
-        
+
         // connectingControl
         _connectingControl.Location = new Point(273, 412);
         _connectingControl.Name = "connectingControl";
@@ -56,14 +67,14 @@ public sealed class ControlsContainer : IDisposable
         _startStopButtonControl.Name = "StartStopButton";
         _startStopButtonControl.Size = new Size(103, 26);
         _startStopButtonControl.TabIndex = 5;
-        
+
         // serverChannelSelector
         _serverChannelSelectorControl.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _serverChannelSelectorControl.Location = new Point(326, 147);
         _serverChannelSelectorControl.Name = "serverChannelSelector1";
         _serverChannelSelectorControl.Size = new Size(340, 203);
         _serverChannelSelectorControl.TabIndex = 21;
-        
+
         await AddControlsToFormAsync();
     }
 
@@ -76,15 +87,5 @@ public sealed class ControlsContainer : IDisposable
         _form.Controls.Add(_startStopButtonControl);
         _form.Controls.Add(_serverChannelSelectorControl);
         return Task.CompletedTask;
-    }
-
-    public void Dispose()
-    {
-        _sortingControl.Dispose();
-        _fileQueueControl.Dispose();
-        _connectingControl.Dispose();
-        _startStopButtonControl.Dispose();
-        _serverChannelSelectorControl.Dispose();
-        
     }
 }

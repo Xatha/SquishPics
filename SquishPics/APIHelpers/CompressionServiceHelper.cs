@@ -15,5 +15,8 @@ public sealed class CompressionServiceHelper
         imageCompressor.FileCompressed -= OnFileCompressed;
     }
 
-    private void OnFileCompressed(object? sender, string s) => FileCompressed?.Invoke(this, s);
+    private void OnFileCompressed(object? sender, string s)
+    {
+        FileCompressed?.Invoke(this, s);
+    }
 }

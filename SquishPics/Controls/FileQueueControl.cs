@@ -1,26 +1,20 @@
-﻿using KeyboardHookManager;
-using Clipboard = System.Windows.Forms.Clipboard;
-using DataFormats = System.Windows.Forms.DataFormats;
-using DragDropEffects = System.Windows.Forms.DragDropEffects;
-using DragEventArgs = System.Windows.Forms.DragEventArgs;
-using KeyEventArgs = System.Windows.Forms.KeyEventArgs;
-using ListViewItem = System.Windows.Forms.ListViewItem;
-using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
-using Point = System.Drawing.Point;
-using UserControl = System.Windows.Forms.UserControl;
+﻿//using KeyboardHookManager;
+
+using SquishPics.Hooks;
 
 namespace SquishPics.Controls;
 
 public partial class FileQueueControl : UserControl
 {
-    public List<FileInfo> Items { get; private set; }
+    private readonly GlobalKeyboardHook _keyboardHook;
     private readonly SortingControl _sortingControl;
-        
+
     private bool _keyHeld;
-        
-    public FileQueueControl(SortingControl sortingControl)
+
+    public FileQueueControl(SortingControl sortingControl, GlobalKeyboardHook keyboardHook)
     {
         _sortingControl = sortingControl;
+        _keyboardHook = keyboardHook;
         InitializeComponent();
 
         Items = new List<FileInfo>();
@@ -30,40 +24,46 @@ public partial class FileQueueControl : UserControl
         CurrentQueueListView.MouseClick += CurrentQueueListViewOnClick;
         ClearQueueButton.Click += ClearQueueButton_Click;
         ImportFilesButton.Click += ImportFilesButton_Click;
-            
-        CurrentQueueListView.KeyDown += CurrentQueueListView_KeyDown;
-        sortingControl.OnSelectedValueChanged += _sortingControl_OnSelectedValueChanged;
 
-        ContextMenuStrip.ItemClicked += ContextMenuStrip_ItemClicked;
-            
-        // I have to use this because I cannot get the WinForms event KeyUp event to work.
-        HookManager.KeyUp += HookManager_KeyUp;
+        CurrentQueueListView.KeyDown += CurrentQueueListView_KeyDown;
+        RemoveImageContextMenuStrip.ItemClicked += ContextMenuStrip_ItemClicked;
+
+        _sortingControl.OnSelectedValueChanged += _sortingControl_OnSelectedValueChanged;
+        _keyboardHook.KeyUp += HookManager_KeyUp;
     }
-        
+
+    public List<FileInfo> Items { get; private set; }
+
+    ~FileQueueControl()
+    {
+        _sortingControl.OnSelectedValueChanged -= _sortingControl_OnSelectedValueChanged;
+        _keyboardHook.KeyUp -= HookManager_KeyUp;
+    }
+
     private void HookManager_KeyUp(object? sender, KeyEventArgs e)
     {
-        if (_keyHeld) _keyHeld = false;
+        _keyHeld = false;
     }
 
     private async void CurrentQueueListView_KeyDown(object? sender, KeyEventArgs e)
     {
+        Console.WriteLine(_keyHeld);
         if (e.KeyCode == Keys.ControlKey) return;
         if (_keyHeld) return;
         switch (e)
         {
-            case {KeyCode: Keys.Delete}:
+            case { KeyCode: Keys.Delete }:
                 DeleteCurrentlySelected();
-                return;
+                break;
             case { KeyCode: Keys.A, Modifiers: Keys.Control }:
                 SelectAll();
-                return;
+                break;
             case { KeyCode: Keys.V, Modifiers: Keys.Control }:
                 await ImportClipboardAsync();
-                return;
-            default:
-                _keyHeld = true;
-                return;
+                break;
         }
+
+        _keyHeld = true;
     }
 
     private async Task ImportClipboardAsync()
@@ -72,10 +72,7 @@ public partial class FileQueueControl : UserControl
 
         // Only allow files to be imported from the clipboard.
         if (data?.GetData(DataFormats.FileDrop) is not string[] files) return;
-        foreach (var file in files)
-        {
-            Items.Add(new FileInfo(file));
-        }
+        foreach (var file in files) Items.Add(new FileInfo(file));
 
         await UpdateQueueOrderAsync();
         await UpdateQueueViewAsync();
@@ -83,10 +80,7 @@ public partial class FileQueueControl : UserControl
 
     private void SelectAll()
     {
-        foreach (ListViewItem item in CurrentQueueListView.Items)
-        {
-            item.Selected = true;
-        }
+        foreach (ListViewItem item in CurrentQueueListView.Items) item.Selected = true;
     }
 
     private void DeleteCurrentlySelected()
@@ -101,8 +95,8 @@ public partial class FileQueueControl : UserControl
 
     private void ContextMenuStrip_ItemClicked(object? sender, ToolStripItemClickedEventArgs e)
     {
-        if (e.ClickedItem?.Text != "Remove") return;
-            
+        if (e.ClickedItem?.Text != @"Remove") return;
+
         var selectedItems = CurrentQueueListView.SelectedItems;
         foreach (ListViewItem item in selectedItems)
         {
@@ -114,7 +108,7 @@ public partial class FileQueueControl : UserControl
     private void CurrentQueueListViewOnClick(object? sender, MouseEventArgs e)
     {
         if (e.Button != MouseButtons.Right) return;
-        ContextMenuStrip.Show(this, new Point(e.X, e.Y + ContextMenuStrip.Height));
+        RemoveImageContextMenuStrip.Show(this, new Point(e.X, e.Y + RemoveImageContextMenuStrip.Height));
     }
 
     private async void _sortingControl_OnSelectedValueChanged(object? sender, EventArgs e)
@@ -124,7 +118,10 @@ public partial class FileQueueControl : UserControl
     }
 
     //TODO: Perhaps there's a way to keep order without having to re-add all the items?
-    private async Task UpdateQueueOrderAsync() => Items = await SortFilesAsync(Items);
+    private async Task UpdateQueueOrderAsync()
+    {
+        Items = await SortFilesAsync(Items);
+    }
 
     //TODO: Perhaps there's a way to keep order without having to re-add all the items?
     private Task UpdateQueueViewAsync()
@@ -141,6 +138,7 @@ public partial class FileQueueControl : UserControl
                 listview.SubItems.Add(file.Extension);
                 listviewItems.Add(listview);
             }
+
             CurrentQueueListView.BeginUpdate();
             CurrentQueueListView.Items.AddRange(listviewItems.ToArray());
             CurrentQueueListView.EndUpdate();
@@ -154,15 +152,18 @@ public partial class FileQueueControl : UserControl
         var sortingOrder = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.SORTING_ORDER);
         var fileSortType = (sortingMode, sortingOrder) switch
         {
-            ("Name", "Ascending")  => unsortedFiles.OrderBy(f => f.Name).ToList(),                                //If FileSortType.ByName    
-            ("Name", "Descending") => unsortedFiles.OrderByDescending(f => f.Name).ToList(),                      //If FileSortType.ByName 
-            ("Size", "Ascending")  => unsortedFiles.OrderBy(f => f.Length).ToList(),                              //If FileSortType.BySize
-            ("Size", "Descending") => unsortedFiles.OrderByDescending(f => f.Length).ToList(),                    //If FileSortType.BySize 
-            ("Type", "Ascending")  => unsortedFiles.OrderBy(f => f.Extension).ToList(),                           //If FileSortType.Type
-            ("Type", "Descending") => unsortedFiles.OrderByDescending(f => f.Extension).ToList(),                 //If FileSortType.Type 
-            ("Date Modified", "Ascending")  => unsortedFiles.OrderBy(f => f.LastWriteTimeUtc).ToList(),           //If FileSortType.ByDate
-            ("Date Modified", "Descending") => unsortedFiles.OrderByDescending(f => f.LastWriteTimeUtc).ToList(), //If FileSortType.ByDate
-            _                      => unsortedFiles.ToList()
+            ("Name", "Ascending") => unsortedFiles.OrderBy(f => f.Name).ToList(), //If FileSortType.ByName    
+            ("Name", "Descending") => unsortedFiles.OrderByDescending(f => f.Name).ToList(), //If FileSortType.ByName 
+            ("Size", "Ascending") => unsortedFiles.OrderBy(f => f.Length).ToList(), //If FileSortType.BySize
+            ("Size", "Descending") => unsortedFiles.OrderByDescending(f => f.Length).ToList(), //If FileSortType.BySize 
+            ("Type", "Ascending") => unsortedFiles.OrderBy(f => f.Extension).ToList(), //If FileSortType.Type
+            ("Type", "Descending") => unsortedFiles.OrderByDescending(f => f.Extension)
+                .ToList(), //If FileSortType.Type 
+            ("Date Modified", "Ascending") => unsortedFiles.OrderBy(f => f.LastWriteTimeUtc)
+                .ToList(), //If FileSortType.ByDate
+            ("Date Modified", "Descending") => unsortedFiles.OrderByDescending(f => f.LastWriteTimeUtc)
+                .ToList(), //If FileSortType.ByDate
+            _ => unsortedFiles.ToList()
         };
         return fileSortType;
     }
@@ -172,19 +173,21 @@ public partial class FileQueueControl : UserControl
         using var openFileDialog = new OpenFileDialog
         {
             Multiselect = true,
-            Filter = @"Image Files (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png;", //TODO: We can currently only compress these file types.
+            Filter =
+                @"Image Files (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png;", //TODO: We can currently only compress these file types.
             //@"Image Files (*.jpg;*.jpeg;*.png;*.gif;*.gifv;*.mp4)|*.jpg;*.jpeg;*.png;*.gif;*.gifv;*.mp4",
             InitialDirectory = await GetLastVisitedDirectoryAsync(),
             Title = @"Select files to import"
         };
-            
+
         if (openFileDialog.ShowDialog() != DialogResult.OK) return;
-            
-        await GlobalSettings.SafeSetSettingAsync(SettingKeys.LAST_VISITED_DIRECTORY_DIALOGUE, 
+
+        await GlobalSettings.SafeSetSettingAsync(SettingKeys.LAST_VISITED_DIRECTORY_DIALOGUE,
             Path.GetDirectoryName(openFileDialog.FileNames[0]) ?? string.Empty);
-            
+
         foreach (var fileName in openFileDialog.FileNames)
         {
+            if (Items.Exists(x => x.FullName == fileName)) continue;
             Items.Add(new FileInfo(fileName));
         }
 
@@ -208,7 +211,6 @@ public partial class FileQueueControl : UserControl
     private async Task AddFilesToQueueAsync(IEnumerable<string> filePaths)
     {
         foreach (var filePath in filePaths)
-        {
             try
             {
                 var fileInfo = new FileInfo(filePath);
@@ -220,19 +222,21 @@ public partial class FileQueueControl : UserControl
                 Console.WriteLine(e); //TODO: Logging.
                 throw;
             }
-        }
 
         await UpdateQueueOrderAsync();
         await UpdateQueueViewAsync();
     }
-        
+
     private Task ResetStyleAsync()
     {
         CurrentQueueListView.BackColor = Color.White;
         return Task.CompletedTask;
     }
 
-    private async void CurrentQueueListView_DragLeave(object? sender, EventArgs e) => await ResetStyleAsync();
+    private async void CurrentQueueListView_DragLeave(object? sender, EventArgs e)
+    {
+        await ResetStyleAsync();
+    }
 
     private void CurrentQueueListView_DragEnter(object? sender, DragEventArgs e)
     {
@@ -246,15 +250,16 @@ public partial class FileQueueControl : UserControl
         await ResetStyleAsync();
         if (e.Data?.GetData(DataFormats.FileDrop) is string[] files) await AddFilesToQueueAsync(files);
     }
-        
+
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
             components?.Dispose();
             _sortingControl.OnSelectedValueChanged -= _sortingControl_OnSelectedValueChanged;
-            HookManager.KeyUp -= HookManager_KeyUp;
+            //HookManager.KeyUp -= HookManager_KeyUp;
         }
+
         base.Dispose(disposing);
     }
 }

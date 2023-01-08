@@ -1,26 +1,28 @@
-﻿namespace SquishPics.Controls
+﻿namespace SquishPics.Controls;
+
+public partial class APIKeyForm : Form
 {
-    public partial class APIKeyForm : Form
+    public APIKeyForm()
     {
-        public APIKeyForm()
-        {
-            InitializeComponent();
-            MaximizeBox = false;
-        }
+        InitializeComponent();
+        MaximizeBox = false;
+    }
 
-        private async void APIKeyForm_Load(object sender, EventArgs e) =>
-            APIKEYTextBox.Text = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.API_KEY);
+    private async void APIKeyForm_Load(object sender, EventArgs e)
+    {
+        APIKEYTextBox.Text = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.API_KEY);
+    }
 
-        protected override async void OnFormClosing(FormClosingEventArgs e)
-        {
-            var apiKey = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.API_KEY);
-            if (apiKey != APIKEYTextBox.Text) await GlobalSettings.SafeSetSettingAsync(SettingKeys.API_KEY, APIKEYTextBox.Text);
+    protected override async void OnFormClosing(FormClosingEventArgs e)
+    {
+        var apiKey = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.API_KEY);
+        if (apiKey != APIKEYTextBox.Text)
+            await GlobalSettings.SafeSetSettingAsync(SettingKeys.API_KEY, APIKEYTextBox.Text);
 
-            base.OnFormClosing(e);
-            if (e.CloseReason == CloseReason.WindowsShutDown) return;
+        base.OnFormClosing(e);
+        if (e.CloseReason == CloseReason.WindowsShutDown) return;
 
-            e.Cancel = true;
-            Hide();
-        }
+        e.Cancel = true;
+        Hide();
     }
 }

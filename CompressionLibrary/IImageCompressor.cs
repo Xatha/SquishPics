@@ -1,8 +1,6 @@
-﻿
-namespace CompressionLibrary
+﻿namespace CompressionLibrary;
+
+public interface IImageCompressor
 {
-    public interface IImageCompressor
-    {
-        Task StartCompressionAsync();
-    }
+    Task StartCompressionAsync();
 }

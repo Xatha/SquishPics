@@ -7,8 +7,11 @@ internal partial class GlobalSettings
     private static readonly object _locker = new();
     private static Timer? _timer;
 
-    internal static void ForceSave() => Default.Save();
-    
+    internal static void ForceSave()
+    {
+        Default.Save();
+    }
+
     internal static void StartAutoSave()
     {
         _timer = new Timer(
@@ -36,6 +39,7 @@ internal partial class GlobalSettings
             return Task.FromResult<T?>(default);
         }
     }
+
     internal static T? SafeGetSetting<T>(SettingKeys key)
     {
         try
@@ -49,7 +53,7 @@ internal partial class GlobalSettings
             return default;
         }
     }
-    
+
 
     //TODO, This might be wrong but hopefully this won't lead to concurrency issues.
     internal static Task SafeSetSettingAsync<T>(SettingKeys key, T value)
@@ -66,6 +70,7 @@ internal partial class GlobalSettings
                 Console.WriteLine(@"Error setting setting: " + key);
             }
         }
+
         return Task.CompletedTask;
     }
 }

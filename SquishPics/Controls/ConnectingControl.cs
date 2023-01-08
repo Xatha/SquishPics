@@ -6,7 +6,7 @@ public partial class ConnectingControl : UserControl
 {
     private readonly DiscordClient _discordClient;
     private State _state;
-    
+
     public ConnectingControl(DiscordClient discordClient)
     {
         InitializeComponent();
@@ -54,17 +54,19 @@ public partial class ConnectingControl : UserControl
             Console.WriteLine(@"Could not retrieve key for the client."); //TODO: Logging
             return;
         }
+
         await _discordClient.RetryLoginAsync(key);
     }
-    
+
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
-            components?.Dispose(); 
+            components?.Dispose();
             _discordClient.OnConnected -= discordClient_OnConnected;
             _discordClient.OnDisconnected -= _discordClient_OnDisconnected;
         }
+
         base.Dispose(disposing);
     }
 
@@ -74,5 +76,3 @@ public partial class ConnectingControl : UserControl
         Disconnected
     }
 }
-
-
