@@ -27,7 +27,6 @@ public partial class SortingControl : UserControl
         }
     }
 
-
     private void InitializeSettings()
     {
         //TODO: Streamline on-first inits?

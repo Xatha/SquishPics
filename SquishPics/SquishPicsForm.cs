@@ -1,23 +1,18 @@
 using System.ComponentModel;
-using SquishPics.Controllers;
 using SquishPics.Controls;
-using SquishPics.Hooks;
-using SquishPicsDiscordBackend;
 
 namespace SquishPics;
 
 public partial class SquishPicsForm : Form
 {
-    private readonly APIKeyForm _apiKeyForm;
-    private readonly DiscordClient _client;
+    private readonly ApiKeyForm _apiKeyForm;
     private readonly ControlsContainer _controls;
 
-    public SquishPicsForm(DiscordClient client, ApiController apiController, GlobalKeyboardHook keyboardHook)
+    public SquishPicsForm(ControlsContainer controls)
     {
         KeyPreview = false;
-        _apiKeyForm = new APIKeyForm();
-        _client = client;
-        _controls = new ControlsContainer(this, _client, apiController, keyboardHook);
+        _apiKeyForm = new ApiKeyForm();
+        _controls = controls;
         InitializeComponent();
 
         _apiKeyForm.VisibleChanged += APIKeyForm_VisibleChanged;
@@ -34,14 +29,14 @@ public partial class SquishPicsForm : Form
 
     private async void ExceptionButton_Click(object? sender, EventArgs e)
     {
-        //await _client.StopAsync();
-        throw new Exception("Test Exception");
+        //await Program._client.StopAsync();
+        //throw new Exception("Test Exception");
     }
 
     //TODO: Move these propagated events to a separate class
     private async void Form1_Load(object sender, EventArgs e)
     {
-        await _controls.InitializeControlsAsync();
+        await _controls.InitializeControlsAsync(this);
     }
 
     private void ApiKeyButton_Click(object? sender, EventArgs e)

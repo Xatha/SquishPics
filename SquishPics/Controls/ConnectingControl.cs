@@ -1,9 +1,12 @@
-﻿using SquishPicsDiscordBackend;
+﻿using log4net;
+using SquishPicsDiscordBackend;
+using SquishPicsDiscordBackend.Logging;
 
 namespace SquishPics.Controls;
 
 public partial class ConnectingControl : UserControl
 {
+    private readonly ILog _log = LogProvider.GetLogger<ConnectingControl>();
     private readonly DiscordClient _discordClient;
     private State _state;
 
@@ -51,7 +54,7 @@ public partial class ConnectingControl : UserControl
     {
         if (await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.API_KEY) is var key && key is null)
         {
-            Console.WriteLine(@"Could not retrieve key for the client."); //TODO: Logging
+            await _log.WarnAsync("No API key set, cannot connect to Discord");
             return;
         }
 

@@ -1,40 +1,30 @@
 using SquishPics.Controllers;
-using SquishPics.Controls;
 using SquishPics.Hooks;
 using SquishPicsDiscordBackend;
 
-namespace SquishPics;
+namespace SquishPics.Controls;
 
 public sealed class ControlsContainer : IDisposable
 {
     private readonly ConnectingControl _connectingControl;
     private readonly FileQueueControl _fileQueueControl;
-    private readonly Form _form;
     private readonly ServerChannelSelectorControl _serverChannelSelectorControl;
     private readonly SortingControl _sortingControl;
     private readonly StartStopButtonControl _startStopButtonControl;
+    private readonly StatusControl _statusControl;
 
-    public ControlsContainer(Form form, DiscordClient client, ApiController apiController,
+    public ControlsContainer(DiscordClient client, ApiController apiController,
         GlobalKeyboardHook keyboardHook)
     {
-        _form = form;
         _sortingControl = new SortingControl();
         _fileQueueControl = new FileQueueControl(_sortingControl, keyboardHook);
         _connectingControl = new ConnectingControl(client);
         _startStopButtonControl = new StartStopButtonControl(apiController, _fileQueueControl);
         _serverChannelSelectorControl = new ServerChannelSelectorControl(client);
+        _statusControl = new StatusControl(apiController);
     }
 
-    public void Dispose()
-    {
-        _sortingControl.Dispose();
-        _fileQueueControl.Dispose();
-        _connectingControl.Dispose();
-        _startStopButtonControl.Dispose();
-        _serverChannelSelectorControl.Dispose();
-    }
-
-    public async Task InitializeControlsAsync()
+    public async Task InitializeControlsAsync(Form form)
     {
         // fileQueueControl
         _fileQueueControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom
@@ -71,21 +61,38 @@ public sealed class ControlsContainer : IDisposable
         // serverChannelSelector
         _serverChannelSelectorControl.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
         _serverChannelSelectorControl.Location = new Point(326, 147);
-        _serverChannelSelectorControl.Name = "serverChannelSelector1";
+        _serverChannelSelectorControl.Name = "serverChannelSelector";
         _serverChannelSelectorControl.Size = new Size(340, 203);
         _serverChannelSelectorControl.TabIndex = 21;
 
-        await AddControlsToFormAsync();
+        // StatusControl
+        _statusControl.Location = new Point(12, 368);
+        _statusControl.Name = "statusProgressBar";
+        _statusControl.Size = new Size(237, 70);
+        _statusControl.TabIndex = 0;
+        _statusControl.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        await AddControlsToFormAsync(form);
     }
 
-    private Task AddControlsToFormAsync()
+    private Task AddControlsToFormAsync(Form form)
     {
         // Add the controls to the form
-        _form.Controls.Add(_fileQueueControl);
-        _form.Controls.Add(_sortingControl);
-        _form.Controls.Add(_connectingControl);
-        _form.Controls.Add(_startStopButtonControl);
-        _form.Controls.Add(_serverChannelSelectorControl);
+        form.Controls.Add(_fileQueueControl);
+        form.Controls.Add(_sortingControl);
+        form.Controls.Add(_connectingControl);
+        form.Controls.Add(_startStopButtonControl);
+        form.Controls.Add(_serverChannelSelectorControl);
+        form.Controls.Add(_statusControl);
         return Task.CompletedTask;
+    }
+    
+    public void Dispose()
+    {
+        _statusControl.Dispose();
+        _sortingControl.Dispose();
+        _fileQueueControl.Dispose();
+        _connectingControl.Dispose();
+        _startStopButtonControl.Dispose();
+        _serverChannelSelectorControl.Dispose();
     }
 }

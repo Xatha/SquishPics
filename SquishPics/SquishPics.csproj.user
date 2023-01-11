@@ -19,6 +19,9 @@
     <Compile Update="Controls\SortingControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Controls\StatusControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="SquishPicsForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -28,30 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.StatusProgressBar = new System.Windows.Forms.ProgressBar();
-            this.StatusProgressBarLabel = new System.Windows.Forms.Label();
             this.ApiKeyButton = new System.Windows.Forms.Button();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.ExceptionButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
-            // 
-            // StatusProgressBar
-            // 
-            this.StatusProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.StatusProgressBar.Location = new System.Drawing.Point(12, 412);
-            this.StatusProgressBar.Name = "StatusProgressBar";
-            this.StatusProgressBar.Size = new System.Drawing.Size(237, 26);
-            this.StatusProgressBar.TabIndex = 0;
-            // 
-            // StatusProgressBarLabel
-            // 
-            this.StatusProgressBarLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.StatusProgressBarLabel.AutoSize = true;
-            this.StatusProgressBarLabel.Location = new System.Drawing.Point(12, 394);
-            this.StatusProgressBarLabel.Name = "StatusProgressBarLabel";
-            this.StatusProgressBarLabel.Size = new System.Drawing.Size(42, 15);
-            this.StatusProgressBarLabel.TabIndex = 1;
-            this.StatusProgressBarLabel.Text = "Status:";
             // 
             // ApiKeyButton
             // 
@@ -79,21 +59,16 @@
             this.ClientSize = new System.Drawing.Size(673, 450);
             this.Controls.Add(this.ExceptionButton);
             this.Controls.Add(this.ApiKeyButton);
-            this.Controls.Add(this.StatusProgressBarLabel);
-            this.Controls.Add(this.StatusProgressBar);
             this.MinimumSize = new System.Drawing.Size(689, 489);
             this.Name = "SquishPicsForm";
             this.Text = "SquishPics";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
-
-        private ProgressBar StatusProgressBar;
-        private Label StatusProgressBarLabel;
+        
         private Button ApiKeyButton;
         private ColorDialog colorDialog1;
         private Button ExceptionButton;

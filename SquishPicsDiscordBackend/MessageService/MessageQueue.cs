@@ -1,12 +1,15 @@
 using System.Collections.Concurrent;
 using Discord;
+using log4net;
+using SquishPicsDiscordBackend.Logging;
 using SquishPicsDiscordBackend.RetryHelpers;
 
 namespace SquishPicsDiscordBackend.MessageService;
 
 public sealed class MessageQueue : ConcurrentQueue<IMessage>
 {
-    private const int MessageMillisecondDelay = 1000;
+    private readonly ILog _log = LogProvider.GetLogger<MessageQueue>();
+    private const int MESSAGE_MILLISECOND_DELAY = 1000;
     private readonly DiscordClient _client;
     private bool _isRunning;
 
@@ -17,8 +20,8 @@ public sealed class MessageQueue : ConcurrentQueue<IMessage>
 
     public event EventHandler? Finished;
     public event EventHandler<RetryTimeoutException>? Failed;
-
-    //TODO: Handle on disconnect from server.
+    public event EventHandler? MessageSent;
+    
     public async Task StartSendingAsync()
     {
         _isRunning = true;
@@ -30,12 +33,13 @@ public sealed class MessageQueue : ConcurrentQueue<IMessage>
             }
             catch (RetryTimeoutException e)
             {
-                Console.WriteLine("Failed to send message... Will abort.");
+                await _log.ErrorAsync("Failed to send message... Will abort.", e);
                 OnFailed(e);
                 return;
             }
 
-            await Task.Delay(MessageMillisecondDelay);
+            OnMessageSent();
+            await Task.Delay(MESSAGE_MILLISECOND_DELAY);
         }
 
         OnFinished();
@@ -65,13 +69,11 @@ public sealed class MessageQueue : ConcurrentQueue<IMessage>
         throw new RetryTimeoutException($"Failed to send message after {maxRetries} attempts.");
     }
 
-    private void OnFinished()
-    {
-        Finished?.Invoke(this, EventArgs.Empty);
-    }
+    private void OnFinished() => Finished?.Invoke(this, EventArgs.Empty);
+    private void OnFailed(RetryTimeoutException e) => Failed?.Invoke(this, e);
 
-    private void OnFailed(RetryTimeoutException e)
+    private void OnMessageSent()
     {
-        Failed?.Invoke(this, e);
+        MessageSent?.Invoke(this, EventArgs.Empty);
     }
 }

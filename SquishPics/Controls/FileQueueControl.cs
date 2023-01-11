@@ -1,5 +1,4 @@
-﻿//using KeyboardHookManager;
-
+﻿using System.Diagnostics;
 using SquishPics.Hooks;
 
 namespace SquishPics.Controls;
@@ -22,6 +21,7 @@ public partial class FileQueueControl : UserControl
         CurrentQueueListView.DragDrop += CurrentQueueListView_DragDrop;
         CurrentQueueListView.DragLeave += CurrentQueueListView_DragLeave;
         CurrentQueueListView.MouseClick += CurrentQueueListViewOnClick;
+        CurrentQueueListView.DoubleClick += CurrentQueueListViewOnDoubleClick;
         ClearQueueButton.Click += ClearQueueButton_Click;
         ImportFilesButton.Click += ImportFilesButton_Click;
 
@@ -31,7 +31,7 @@ public partial class FileQueueControl : UserControl
         _sortingControl.OnSelectedValueChanged += _sortingControl_OnSelectedValueChanged;
         _keyboardHook.KeyUp += HookManager_KeyUp;
     }
-
+    
     public List<FileInfo> Items { get; private set; }
 
     ~FileQueueControl()
@@ -40,14 +40,10 @@ public partial class FileQueueControl : UserControl
         _keyboardHook.KeyUp -= HookManager_KeyUp;
     }
 
-    private void HookManager_KeyUp(object? sender, KeyEventArgs e)
-    {
-        _keyHeld = false;
-    }
+    private void HookManager_KeyUp(object? sender, KeyEventArgs e) => _keyHeld = false;
 
     private async void CurrentQueueListView_KeyDown(object? sender, KeyEventArgs e)
     {
-        Console.WriteLine(_keyHeld);
         if (e.KeyCode == Keys.ControlKey) return;
         if (_keyHeld) return;
         switch (e)
@@ -65,6 +61,22 @@ public partial class FileQueueControl : UserControl
 
         _keyHeld = true;
     }
+    
+    private void CurrentQueueListViewOnDoubleClick(object? sender, EventArgs e)
+    {
+        if (CurrentQueueListView.SelectedItems.Count == 0) return;
+        try
+        {        
+            var item = CurrentQueueListView.SelectedItems[0];
+            var file = Items[item.Index];
+            Process.Start("explorer.exe", $"/select,\"{file.FullName}\"");
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show($"Could not open file...\n {exception.Message}","Error", 
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
 
     private async Task ImportClipboardAsync()
     {
@@ -72,7 +84,11 @@ public partial class FileQueueControl : UserControl
 
         // Only allow files to be imported from the clipboard.
         if (data?.GetData(DataFormats.FileDrop) is not string[] files) return;
-        foreach (var file in files) Items.Add(new FileInfo(file));
+        foreach (var file in files)
+        {
+            if (Items.Exists(x => x.FullName == file)) continue;
+            Items.Add(new FileInfo(file));
+        }
 
         await UpdateQueueOrderAsync();
         await UpdateQueueViewAsync();
@@ -146,26 +162,24 @@ public partial class FileQueueControl : UserControl
         return Task.CompletedTask;
     }
 
+
     private static async Task<List<FileInfo>> SortFilesAsync(IEnumerable<FileInfo> unsortedFiles)
     {
         var sortingMode = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.SORTING_MODE);
         var sortingOrder = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.SORTING_ORDER);
         var fileSortType = (sortingMode, sortingOrder) switch
         {
-            ("Name", "Ascending") => unsortedFiles.OrderBy(f => f.Name).ToList(), //If FileSortType.ByName    
-            ("Name", "Descending") => unsortedFiles.OrderByDescending(f => f.Name).ToList(), //If FileSortType.ByName 
-            ("Size", "Ascending") => unsortedFiles.OrderBy(f => f.Length).ToList(), //If FileSortType.BySize
-            ("Size", "Descending") => unsortedFiles.OrderByDescending(f => f.Length).ToList(), //If FileSortType.BySize 
-            ("Type", "Ascending") => unsortedFiles.OrderBy(f => f.Extension).ToList(), //If FileSortType.Type
-            ("Type", "Descending") => unsortedFiles.OrderByDescending(f => f.Extension)
-                .ToList(), //If FileSortType.Type 
-            ("Date Modified", "Ascending") => unsortedFiles.OrderBy(f => f.LastWriteTimeUtc)
-                .ToList(), //If FileSortType.ByDate
-            ("Date Modified", "Descending") => unsortedFiles.OrderByDescending(f => f.LastWriteTimeUtc)
-                .ToList(), //If FileSortType.ByDate
-            _ => unsortedFiles.ToList()
+            ("Name", "Ascending")  => unsortedFiles.OrderBy(f => f.Name),
+            ("Name", "Descending") => unsortedFiles.OrderByDescending(f => f.Name), 
+            ("Size", "Ascending")  => unsortedFiles.OrderBy(f => f.Length),
+            ("Size", "Descending") => unsortedFiles.OrderByDescending(f => f.Length),
+            ("Type", "Ascending")  => unsortedFiles.OrderBy(f => f.Extension),
+            ("Type", "Descending") => unsortedFiles.OrderByDescending(f => f.Extension), 
+            ("Date Modified", "Ascending")  => unsortedFiles.OrderBy(f => f.LastWriteTimeUtc),
+            ("Date Modified", "Descending") => unsortedFiles.OrderByDescending(f => f.LastWriteTimeUtc),
+            _ => unsortedFiles
         };
-        return fileSortType;
+        return fileSortType.ToList();
     }
 
     private async void ImportFilesButton_Click(object? sender, EventArgs e)

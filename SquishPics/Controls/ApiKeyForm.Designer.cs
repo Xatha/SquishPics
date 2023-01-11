@@ -1,6 +1,6 @@
 ﻿namespace SquishPics.Controls
 {
-    partial class APIKeyForm
+    partial class ApiKeyForm
     {
         /// <summary>
         /// Required designer variable.
@@ -75,7 +75,7 @@
             this.ForeColor = System.Drawing.SystemColors.Control;
             this.MaximumSize = new System.Drawing.Size(250, 169);
             this.MinimumSize = new System.Drawing.Size(250, 169);
-            this.Name = "APIKeyForm";
+            this.Name = "ApiKeyForm";
             this.Text = "APIKeyForm";
             this.Load += new System.EventHandler(this.APIKeyForm_Load);
             this.ResumeLayout(false);

@@ -1,10 +1,11 @@
 using CompressionLibrary;
+using SquishPics.Controllers;
 
 namespace SquishPics.APIHelpers;
 
 public sealed class CompressionServiceHelper
 {
-    public event EventHandler<string>? FileCompressed;
+    public event EventHandler<Progress>? FileCompressed;
 
     public async Task StartAsync(List<FileInfo> files, int maxFileSizeInBytes)
     {
@@ -15,7 +16,7 @@ public sealed class CompressionServiceHelper
         imageCompressor.FileCompressed -= OnFileCompressed;
     }
 
-    private void OnFileCompressed(object? sender, string s)
+    private void OnFileCompressed(object? sender, Progress s)
     {
         FileCompressed?.Invoke(this, s);
     }

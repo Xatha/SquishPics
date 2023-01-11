@@ -1,16 +1,14 @@
+using log4net;
+using SquishPicsDiscordBackend.Logging;
 using Timer = System.Threading.Timer;
 
 namespace SquishPics;
 
 internal partial class GlobalSettings
 {
+    private static readonly ILog _log = LogProvider.GetLogger<GlobalSettings>();
     private static readonly object _locker = new();
     private static Timer? _timer;
-
-    internal static void ForceSave()
-    {
-        Default.Save();
-    }
 
     internal static void StartAutoSave()
     {
@@ -25,18 +23,20 @@ internal partial class GlobalSettings
     {
         _timer?.Dispose();
     }
+    
+    internal static void ForceSave() => Default.Save();
 
-    internal static Task<T?> SafeGetSettingAsync<T>(SettingKeys key)
+    internal static async Task<T?> SafeGetSettingAsync<T>(SettingKeys key)
     {
         try
         {
             ForceSave();
-            return Task.FromResult((T?)Default[key.ToString()]);
+            return (T?)Default[key.ToString()];
         }
         catch (Exception)
         {
-            Console.WriteLine(@"Error getting setting: " + key);
-            return Task.FromResult<T?>(default);
+            await _log.ErrorAsync($"Failed to get setting: {key}");
+            return default;
         }
     }
 
@@ -49,7 +49,7 @@ internal partial class GlobalSettings
         }
         catch (Exception)
         {
-            Console.WriteLine(@"Error getting setting: " + key);
+            _log.Error($"Failed to get setting: {key}");
             return default;
         }
     }
@@ -67,11 +67,11 @@ internal partial class GlobalSettings
             }
             catch (Exception)
             {
-                Console.WriteLine(@"Error setting setting: " + key);
+                _log.Error($"Failed to get setting: {key}"); 
             }
         }
 
-        return Task.CompletedTask;
+        return Task.FromResult(Task.CompletedTask);
     }
 }
 

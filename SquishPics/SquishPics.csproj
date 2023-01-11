@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Target Name="PostPublish" AfterTargets="Publish">
+        <Exec Command="..\postPublish.bat" />
+    </Target>
+
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net7.0-windows</TargetFramework>
@@ -30,8 +34,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CompressionLibrary\CompressionLibrary.csproj"/>
-        <ProjectReference Include="..\SquishPicsDiscordBackend\SquishPicsDiscordBackend.csproj"/>
+        <ProjectReference Include="..\CompressionLibrary\CompressionLibrary.csproj" />
+        <ProjectReference Include="..\SquishPicsDiscordBackend\SquishPicsDiscordBackend.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="log4net" Version="2.0.15" />
     </ItemGroup>
 
 </Project>

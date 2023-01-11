@@ -1,8 +1,8 @@
 ﻿namespace SquishPics.Controls;
 
-public partial class APIKeyForm : Form
+public partial class ApiKeyForm : Form
 {
-    public APIKeyForm()
+    public ApiKeyForm()
     {
         InitializeComponent();
         MaximizeBox = false;

@@ -10,16 +10,20 @@ public sealed class MessageServiceHelper
 {
     private readonly DiscordClient _client;
     private readonly MessageQueue _messageQueue;
+    private int _messagesBeingSent;
+    private int _messagesSent;
 
     public MessageServiceHelper(DiscordClient client)
     {
         _client = client;
         _messageQueue = new MessageQueue(client);
+        _messageQueue.MessageSent += MessageQueueOnMessageSent;
         _messageQueue.Finished += MessageQueue_Finished;
         _messageQueue.Failed += MessageQueue_Failed;
     }
 
     public event EventHandler? MessageQueueStopped;
+    public event EventHandler<MessageProgress>? MessageSent;
 
     //TODO: Add link posting support.
     public async Task SetupQueueAsync(IEnumerable<string> filePaths)
@@ -28,34 +32,19 @@ public sealed class MessageServiceHelper
 
         var selectedMessageChannel = await GetSelectedMessageChannelAsync();
         var messages = filePaths.Select(path => new AttachmentMessage(path, selectedMessageChannel)).ToList();
+        _messagesBeingSent = messages.Count;
+        _messagesSent = 0;
         messages.ForEach(_messageQueue.Enqueue);
     }
 
-    public void StartQueueForget()
-    {
-        Task.Run(() => _messageQueue.StartSendingAsync()).ConfigureAwait(false);
-    }
+    public void StartQueueForget() => Task.Run(() => _messageQueue.StartSendingAsync()).ConfigureAwait(false);
 
     public async Task StopQueueAsync()
     {
         await _messageQueue.StopSendingAsync();
         _messageQueue.Clear();
     }
-
-    private void MessageQueue_Finished(object? o, EventArgs eventArgs)
-    {
-        OnMessageQueueStopped();
-    }
-
-    //TODO: Add logging.
-    private void MessageQueue_Failed(object? o, RetryTimeoutException retryTimeoutException)
-    {
-        MessageBox.Show(
-            @"Failed to send message. This is likely because the application could not establish connecting to Discord for a prolonged period.",
-            @"Error - Failed to send messages.", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        OnMessageQueueStopped();
-    }
-
+    
     private async Task<IMessageChannel> GetSelectedMessageChannelAsync()
     {
         var selectedServer = ServerChannelSelectorControl.SelectedServer;
@@ -73,8 +62,35 @@ public sealed class MessageServiceHelper
         return messageChannel ?? throw new NullReferenceException("Channel not found."); //TODO: Proper exception.
     }
 
-    private void OnMessageQueueStopped()
+    private void MessageQueueOnMessageSent(object? sender, EventArgs e)
     {
-        MessageQueueStopped?.Invoke(this, EventArgs.Empty);
+        _messagesSent++;
+        OnMessageSent(new MessageProgress
+        {
+            MessagesSent = _messagesSent,
+            MessagesTotal = _messagesBeingSent
+        });
     }
+    
+    private void OnMessageQueueStopped() => MessageQueueStopped?.Invoke(this, EventArgs.Empty);
+
+    private void OnMessageSent(MessageProgress e) => MessageSent?.Invoke(this, e);
+
+    #region Events
+    
+    private void MessageQueue_Finished(object? o, EventArgs eventArgs) => OnMessageQueueStopped();
+
+    //TODO: Add logging.
+    private void MessageQueue_Failed(object? o, RetryTimeoutException retryTimeoutException)
+    {
+        MessageBox.Show(
+            @"Failed to send message. This is likely because the application could not establish connecting to Discord for a prolonged period.",
+            @"Error - Failed to send messages.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        OnMessageQueueStopped();
+    }
+
+    
+
+    #endregion
+
 }

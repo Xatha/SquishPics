@@ -1,7 +1,6 @@
 ﻿using Discord.Rest;
 using Discord.WebSocket;
 using SquishPicsDiscordBackend;
-using SquishPicsDiscordBackend.RetryHelpers;
 
 namespace SquishPics.Controls;
 
@@ -39,31 +38,13 @@ public partial class ServerChannelSelectorControl : UserControl
         return Task.CompletedTask;
     }
 
-    private async Task ClientOnOnConnectedAsync()
-    {
-        await LoadServersAndChannelsAsync();
-    }
+    private async Task ClientOnOnConnectedAsync() => await LoadServersAndChannelsAsync();
 
-    private async void ServerChannelSelectorControl_Load(object? sender, EventArgs e)
-    {
-        try
-        {
-            await LoadServersAsync().RetryAsync(3, TimeSpan.FromSeconds(3));
-        }
-        catch (RetryTimeoutException exception)
-        {
-            const MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-            Invoke(() =>
-                MessageBox.Show(
-                    $@"Failed to get guilds from Discord API. Please check your connection and try again.", 
-                    @"Error", buttons));
-        }
-    }
+    private async void ServerChannelSelectorControl_Load(object? sender, EventArgs e) 
+        => await LoadServersAndChannelsAsync();
 
-    private async void ServerListBox_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        await LoadChannelsAsync();
-    }
+    private async void ServerListBox_SelectedIndexChanged(object sender, EventArgs e) 
+        => await LoadChannelsAsync();
 
     private async Task LoadServersAsync()
     {
@@ -82,7 +63,7 @@ public partial class ServerChannelSelectorControl : UserControl
 
         if (SelectedServer is null) return;
 
-        _textChannels = await _client.GetChannelsAsync(SelectedServer)!;
+        _textChannels = await _client.GetChannelsAsync(SelectedServer);
 
         var textChannels = await _client.GetChannelsAsync(SelectedServer);
         Invoke(() =>

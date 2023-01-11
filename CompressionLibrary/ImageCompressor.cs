@@ -4,6 +4,7 @@ using System.Drawing;
 
 namespace CompressionLibrary;
 
+//TODO: Refactor everything here.
 public class ImageCompressor : IImageCompressor
 {
     private readonly long _targetFileSize;
@@ -27,7 +28,7 @@ public class ImageCompressor : IImageCompressor
         if (_imageFiles.Count != 0) await CompressImagesToTargetSize();
     }
 
-    public event EventHandler<string>? FileCompressed;
+    public event EventHandler<Progress>? FileCompressed;
 
     public static Task<ImageCompressor> CreateAsync(List<FileInfo> imageFiles, long targetFileSize)
     {
@@ -82,7 +83,6 @@ public class ImageCompressor : IImageCompressor
             foreach (var image in compressedImages.Where(image => image.Size <= _targetFileSize))
             {
                 imagesToProcess.Remove(image.Path);
-                OnOnFileCompressed(image.Path);
             }
         } while (imagesToProcess.Count > 0);
     }
@@ -91,13 +91,22 @@ public class ImageCompressor : IImageCompressor
     {
         List<(string Path, long Size)> results = new();
 
-        foreach (var filePath in images)
+        //foreach (var filePath in images)
+        for (var i = 0; i < images.Count; i++)
         {
+            var filePath = images[i];
             //await _logger.InfoAsync($"Processing {filePath}.");
-            var fileSize = new FileInfo(filePath).Length;
+            var file = new FileInfo(filePath); //???
+
+            OnOnFileCompressed(new Progress
+            {
+                FileProcessed = file.Name,
+                FilesProcessed = i,
+                FilesRemaining = images.Count
+            });
 
             //Creates a compressed image and then replaces it. 
-            using (var processedImage = await CompressImageAsync((filePath, fileSize)))
+            using (var processedImage = await CompressImageAsync((filePath, file.Length)))
             {
                 await FilesUtil.ReplaceImageAsync(filePath, processedImage);
             }
@@ -138,7 +147,7 @@ public class ImageCompressor : IImageCompressor
         return Task.FromResult(newImage);
     }
 
-    protected virtual void OnOnFileCompressed(string e)
+    protected virtual void OnOnFileCompressed(Progress e)
     {
         FileCompressed?.Invoke(this, e);
     }

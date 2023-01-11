@@ -1,14 +1,18 @@
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
+using log4net;
+using SquishPicsDiscordBackend.Logging;
 
+[assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = "log4net.config")]
 namespace SquishPicsDiscordBackend;
 
 public class DiscordClient
 {
+    private readonly ILog _logger = LogProvider.GetLogger<DiscordClient>();
     private readonly DiscordSocketClient _socketClient;
 
-    public DiscordClient(string APIKey)
+    public DiscordClient()
     {
         var config = new DiscordSocketConfig
         {
@@ -16,13 +20,10 @@ public class DiscordClient
         };
 
         _socketClient = new DiscordSocketClient(config);
-        _socketClient.Log += Log;
-
-        _socketClient.LoginAsync(TokenType.Bot, APIKey);
-        _socketClient.StartAsync();
+        _socketClient.Log += _logger.LogClientAsync;
 
         _socketClient.Connected += () => Task.FromResult(ConnectionState = ConnectionState.Connected);
-        _socketClient.Disconnected += e => Task.FromResult(ConnectionState = ConnectionState.Disconnected);
+        _socketClient.Disconnected += _ => Task.FromResult(ConnectionState = ConnectionState.Disconnected);
     }
 
     public ConnectionState ConnectionState { get; set; }
@@ -39,23 +40,28 @@ public class DiscordClient
         remove => _socketClient.Disconnected -= value;
     }
 
-    public async Task RetryLoginAsync(string APIKey)
+    public async Task RetryLoginAsync(string apiKey)
     {
+        await _logger.DebugAsync("Retrying connecting to Discord client...");
+
         await _socketClient.StopAsync();
-        Console.WriteLine("Retry");
-        await _socketClient.LoginAsync(TokenType.Bot, APIKey);
+        await _socketClient.LoginAsync(TokenType.Bot, apiKey);
+        await _socketClient.StartAsync();
+    }
+
+    public async Task StartAsync(string apiKey)
+    {
+        await _socketClient.LoginAsync(TokenType.Bot, apiKey);
         await _socketClient.StartAsync();
     }
 
     public async Task StopAsync()
     {
+        await _logger.DebugAsync("Stopping Discord client...");
         await _socketClient.StopAsync();
     }
 
-    public Task<IReadOnlyCollection<RestGuild>> GetServersAsync()
-    {
-        return _socketClient.Rest.GetGuildsAsync();
-    }
+    public Task<IReadOnlyCollection<RestGuild>> GetServersAsync() => _socketClient.Rest.GetGuildsAsync();
 
     public Task<IEnumerable<SocketTextChannel>> GetChannelsAsync(RestGuild server)
     {
@@ -68,11 +74,5 @@ public class DiscordClient
             && socketGuild.VoiceChannels.All(voiceChannel => voiceChannel.Name != textChannel.Name));
 
         return Task.FromResult(channels);
-    }
-
-    private static Task Log(LogMessage arg)
-    {
-        Console.WriteLine(arg);
-        return Task.CompletedTask;
     }
 }
