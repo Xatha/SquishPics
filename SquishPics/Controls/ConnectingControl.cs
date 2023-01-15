@@ -6,14 +6,15 @@ namespace SquishPics.Controls;
 
 public partial class ConnectingControl : UserControl
 {
-    private readonly ILog _log = LogProvider.GetLogger<ConnectingControl>();
+    private readonly ILog _log;
     private readonly DiscordClient _discordClient;
     private State _state;
 
-    public ConnectingControl(DiscordClient discordClient)
+    public ConnectingControl(ILog log, DiscordClient discordClient)
     {
         InitializeComponent();
         _discordClient = discordClient;
+        _log = log;
         _state = State.Disconnected;
 
         _discordClient.OnConnected += discordClient_OnConnected;

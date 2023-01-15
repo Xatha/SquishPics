@@ -1,6 +1,8 @@
-using SquishPics.Controllers;
+using log4net;
 using SquishPics.Hooks;
 using SquishPicsDiscordBackend;
+using SquishPicsDiscordBackend.Controllers;
+using SquishPicsDiscordBackend.Messaging;
 
 namespace SquishPics.Controls;
 
@@ -13,15 +15,16 @@ public sealed class ControlsContainer : IDisposable
     private readonly StartStopButtonControl _startStopButtonControl;
     private readonly StatusControl _statusControl;
 
-    public ControlsContainer(DiscordClient client, ApiController apiController,
-        GlobalKeyboardHook keyboardHook)
+    public ControlsContainer(ILog connectingControlLog, DiscordClient client,
+        GlobalKeyboardHook keyboardHook, RequestController requestController, DataProcessor dataProcessor,
+        MessageService messageService)
     {
         _sortingControl = new SortingControl();
         _fileQueueControl = new FileQueueControl(_sortingControl, keyboardHook);
-        _connectingControl = new ConnectingControl(client);
-        _startStopButtonControl = new StartStopButtonControl(apiController, _fileQueueControl);
+        _connectingControl = new ConnectingControl(connectingControlLog, client);
+        _startStopButtonControl = new StartStopButtonControl(requestController, dataProcessor, _fileQueueControl);
         _serverChannelSelectorControl = new ServerChannelSelectorControl(client);
-        _statusControl = new StatusControl(apiController);
+        _statusControl = new StatusControl(requestController, messageService, dataProcessor);
     }
 
     public async Task InitializeControlsAsync(Form form)

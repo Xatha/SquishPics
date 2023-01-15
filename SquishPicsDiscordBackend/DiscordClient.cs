@@ -9,24 +9,25 @@ namespace SquishPicsDiscordBackend;
 
 public class DiscordClient
 {
-    private readonly ILog _logger = LogProvider.GetLogger<DiscordClient>();
+    private readonly ILog _log;
     private readonly DiscordSocketClient _socketClient;
 
-    public DiscordClient()
+    public DiscordClient(ILog log)
     {
+        _log = log;
         var config = new DiscordSocketConfig
         {
             GatewayIntents = GatewayIntents.Guilds
         };
 
         _socketClient = new DiscordSocketClient(config);
-        _socketClient.Log += _logger.LogClientAsync;
+        _socketClient.Log += _log.LogClientAsync;
 
         _socketClient.Connected += () => Task.FromResult(ConnectionState = ConnectionState.Connected);
         _socketClient.Disconnected += _ => Task.FromResult(ConnectionState = ConnectionState.Disconnected);
     }
 
-    public ConnectionState ConnectionState { get; set; }
+    public static ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
 
     public event Func<Task> OnConnected
     {
@@ -42,7 +43,7 @@ public class DiscordClient
 
     public async Task RetryLoginAsync(string apiKey)
     {
-        await _logger.DebugAsync("Retrying connecting to Discord client...");
+        await _log.DebugAsync("Retrying connecting to Discord client...");
 
         await _socketClient.StopAsync();
         await _socketClient.LoginAsync(TokenType.Bot, apiKey);
@@ -57,7 +58,7 @@ public class DiscordClient
 
     public async Task StopAsync()
     {
-        await _logger.DebugAsync("Stopping Discord client...");
+        await _log.DebugAsync("Stopping Discord client...");
         await _socketClient.StopAsync();
     }
 

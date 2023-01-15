@@ -6,7 +6,7 @@ namespace SquishPics;
 
 internal partial class GlobalSettings
 {
-    private static readonly ILog _log = LogProvider.GetLogger<GlobalSettings>();
+    private static readonly ILog _log = LogProvider<GlobalSettings>.GetLogger();
     private static readonly object _locker = new();
     private static Timer? _timer;
 

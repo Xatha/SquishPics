@@ -1,40 +1,49 @@
 using System.Diagnostics;
 using Discord.Net;
 using log4net;
-using SquishPics.APIHelpers;
-using SquishPics.Controllers;
 using SquishPics.Controls;
 using SquishPics.Hooks;
 using SquishPicsDiscordBackend;
+using SquishPicsDiscordBackend.Controllers;
 using SquishPicsDiscordBackend.Logging;
+using SquishPicsDiscordBackend.Messaging;
 
 namespace SquishPics;
 
 internal sealed class Program
 {
-    private static readonly ILog _log = LogProvider.GetLogger<Program>();
-    private static readonly DiscordClient _client = new();
-    private static readonly GlobalKeyboardHook _keyboardHook = new();
-    private static ApiController? _controller;
+    private static readonly ILog _log;
+    public static readonly DiscordClient _client;
+    private static readonly GlobalKeyboardHook _keyboardHook;
 
+    static Program()
+    {
+        _log = LogProvider<Program>.GetLogger();
+        _client = new(LogProvider<DiscordClient>.GetLogger());
+        _keyboardHook = new();
+    }
+    
     [STAThread]
     private static void Main()
     {
-        var messageServiceHelper = new MessageServiceHelper(_client);
-        var compressionServiceHelper = new CompressionServiceHelper();
-        _controller = new ApiController(_client, messageServiceHelper, compressionServiceHelper);
-        
+        var messageService = new MessageService(
+            LogProvider<MessageService>.GetLogger(), _client, new MessageQueue(LogProvider<MessageQueue>.GetLogger()));
+
         try
         {
-            ValidateDependencies();
             InitializeConfigurations();
             InitializeEvents();
-            
+            ValidateDependencies();
+
             GlobalSettings.StartAutoSave();
             _keyboardHook.Hook();
             _client.StartAsync(GlobalSettings.Default.API_KEY).Wait();
-            
-            var container = new ControlsContainer(_client, _controller, _keyboardHook);
+
+            var dataProcessor = new DataProcessor(LogProvider<DataProcessor>.GetLogger());
+            var requestController = new RequestController(LogProvider<RequestController>.GetLogger(), messageService, dataProcessor);
+
+            var container = new ControlsContainer(
+                LogProvider<ConnectingControl>.GetLogger(), _client, _keyboardHook, requestController, dataProcessor, messageService);
             Application.Run(new SquishPicsForm(container));
         }
         catch (FileNotFoundException e)

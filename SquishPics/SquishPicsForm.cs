@@ -29,7 +29,7 @@ public partial class SquishPicsForm : Form
 
     private async void ExceptionButton_Click(object? sender, EventArgs e)
     {
-        //await Program._client.StopAsync();
+        await Program._client.StopAsync();
         //throw new Exception("Test Exception");
     }
 

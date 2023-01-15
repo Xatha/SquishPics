@@ -1,6 +1,6 @@
 using Discord;
 
-namespace SquishPicsDiscordBackend.MessageService;
+namespace SquishPicsDiscordBackend.Messaging;
 
 public interface IMessage
 {

@@ -4,18 +4,17 @@ using log4net;
 using SquishPicsDiscordBackend.Logging;
 using SquishPicsDiscordBackend.RetryHelpers;
 
-namespace SquishPicsDiscordBackend.MessageService;
+namespace SquishPicsDiscordBackend.Messaging;
 
 public sealed class MessageQueue : ConcurrentQueue<IMessage>
 {
-    private readonly ILog _log = LogProvider.GetLogger<MessageQueue>();
+    private readonly ILog _log;
     private const int MESSAGE_MILLISECOND_DELAY = 1000;
-    private readonly DiscordClient _client;
     private bool _isRunning;
 
-    public MessageQueue(DiscordClient client)
+    public MessageQueue(ILog log)
     {
-        _client = client;
+        _log = log;
     }
 
     public event EventHandler? Finished;
@@ -55,7 +54,7 @@ public sealed class MessageQueue : ConcurrentQueue<IMessage>
     {
         for (var attempt = 0; attempt < maxRetries; attempt++)
         {
-            if (_client.ConnectionState != ConnectionState.Connected)
+            if (DiscordClient.ConnectionState != ConnectionState.Connected)
             {
                 //Retry
                 await Task.Delay(waitTime);

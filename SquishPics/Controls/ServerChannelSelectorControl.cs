@@ -55,7 +55,7 @@ public partial class ServerChannelSelectorControl : UserControl
 
     private async Task LoadChannelsAsync()
     {
-        var selectedServer = ServerListBox.SelectedItem?.ToString();
+        var selectedServer = Invoke(() => ServerListBox.SelectedItem?.ToString());
         if (selectedServer is null || selectedServer == SelectedServer?.Name) return;
 
         SelectedTextChannel = null;
