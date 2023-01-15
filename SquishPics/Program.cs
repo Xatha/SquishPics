@@ -13,7 +13,7 @@ namespace SquishPics;
 internal sealed class Program
 {
     private static readonly ILog _log;
-    public static readonly DiscordClient _client;
+    private static readonly DiscordClient _client;
     private static readonly GlobalKeyboardHook _keyboardHook;
 
     static Program()
