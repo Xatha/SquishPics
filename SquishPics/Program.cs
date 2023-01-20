@@ -62,7 +62,7 @@ internal sealed class Program
             Cleanup();
         }
     }
-    
+
     private static void ValidateDependencies()
     {
         var assemblyPath = 

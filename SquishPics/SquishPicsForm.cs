@@ -1,17 +1,20 @@
 using System.ComponentModel;
 using SquishPics.Controls;
+using SquishPics.Forms;
 
 namespace SquishPics;
 
 public partial class SquishPicsForm : Form
 {
     private readonly ApiKeyForm _apiKeyForm;
+    private readonly WebPopup _webPopup;
     private readonly ControlsContainer _controls;
 
     public SquishPicsForm(ControlsContainer controls)
     {
         KeyPreview = false;
         _apiKeyForm = new ApiKeyForm();
+        _webPopup = new WebPopup();
         _controls = controls;
         InitializeComponent();
 
@@ -29,6 +32,7 @@ public partial class SquishPicsForm : Form
 
     private async void ExceptionButton_Click(object? sender, EventArgs e)
     {
+        _webPopup.Visible = true;
         //await Program._client.StopAsync();
         //throw new Exception("Test Exception");
     }

@@ -57,14 +57,14 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(673, 450);
-            //this.Controls.Add(this.ExceptionButton);
             this.Controls.Add(this.ApiKeyButton);
+            this.Controls.Add(this.ExceptionButton);
             this.MinimumSize = new System.Drawing.Size(689, 489);
             this.Name = "SquishPicsForm";
             this.Text = "SquishPics";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
-            this.PerformLayout();
+
         }
 
         #endregion
