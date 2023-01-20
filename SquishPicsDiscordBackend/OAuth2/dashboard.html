@@ -46,7 +46,7 @@
                 console.log(response);
                 const { username, discriminator, avatar, id} = response;
 
-                window.chrome.webview.postMessage(JSON.stringify({username, discriminator, id}));
+                window.chrome.webview.postMessage(({username, discriminator, id}));
 
                 //set the welcome username string
                 document.getElementById('name').innerText = ` ${username}#${discriminator}`;

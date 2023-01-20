@@ -49,8 +49,12 @@ public partial class ServerChannelSelectorControl : UserControl
     private async Task LoadServersAsync()
     {
         _guilds = await _client.GetServersAsync();
-        if (_guilds is null) throw new InvalidOperationException("Could not retrieve discord servers.");
-        Invoke(() => ServerListBox.Items.AddRange(_guilds.Select(guild => guild.Name).ToArray<object>()));
+        if (_guilds is null) return;
+        Invoke(() =>
+        {
+            ServerListBox.Items.Clear();
+            ServerListBox.Items.AddRange(_guilds.Select(guild => guild.Name).ToArray<object>());
+        });
     }
 
     private async Task LoadChannelsAsync()
@@ -75,8 +79,10 @@ public partial class ServerChannelSelectorControl : UserControl
 
     private async Task LoadServersAndChannelsAsync()
     {
-        if (_guilds is null) await LoadServersAsync();
-        if (_textChannels is null) await LoadChannelsAsync();
+        //if (_guilds is null) await LoadServersAsync();
+        //if (_textChannels is null) await LoadChannelsAsync();
+        await LoadServersAsync();
+        await LoadChannelsAsync();
     }
 
     private void ChannelListBox_SelectedIndexChanged(object sender, EventArgs e)

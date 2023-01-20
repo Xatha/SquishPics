@@ -2,11 +2,13 @@ using System.Diagnostics;
 using Discord.Net;
 using log4net;
 using SquishPics.Controls;
+using SquishPics.Forms;
 using SquishPics.Hooks;
 using SquishPicsDiscordBackend;
 using SquishPicsDiscordBackend.Controllers;
 using SquishPicsDiscordBackend.Logging;
 using SquishPicsDiscordBackend.Messaging;
+using SquishPicsDiscordBackend.OAuth2;
 
 namespace SquishPics;
 
@@ -15,11 +17,13 @@ internal sealed class Program
     private static readonly ILog _log;
     private static readonly DiscordClient _client;
     private static readonly GlobalKeyboardHook _keyboardHook;
+    private static readonly DiscordOAuth2 _OAuth2;
 
     static Program()
     {
         _log = LogProvider<Program>.GetLogger();
-        _client = new(LogProvider<DiscordClient>.GetLogger());
+        _OAuth2 = new DiscordOAuth2();
+        _client = new(LogProvider<DiscordClient>.GetLogger(), _OAuth2);
         _keyboardHook = new();
     }
     
@@ -37,14 +41,14 @@ internal sealed class Program
 
             GlobalSettings.StartAutoSave();
             _keyboardHook.Hook();
-            _client.StartAsync(GlobalSettings.Default.API_KEY).Wait();
 
             var dataProcessor = new DataProcessor(LogProvider<DataProcessor>.GetLogger());
             var requestController = new RequestController(LogProvider<RequestController>.GetLogger(), messageService, dataProcessor);
 
             var container = new ControlsContainer(
                 LogProvider<ConnectingControl>.GetLogger(), _client, _keyboardHook, requestController, dataProcessor, messageService);
-            Application.Run(new SquishPicsForm(container));
+            
+            Application.Run(new SquishPicsForm(container, _client, new WebPopup(_OAuth2), new ApiKeyForm()));
         }
         catch (FileNotFoundException e)
         {
