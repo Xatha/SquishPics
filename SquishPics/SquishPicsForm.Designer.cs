@@ -30,7 +30,7 @@
         {
             this.ApiKeyButton = new System.Windows.Forms.Button();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-            this.ExceptionButton = new System.Windows.Forms.Button();
+            this.LogoutButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // ApiKeyButton
@@ -45,12 +45,12 @@
             // 
             // ExceptionButton
             // 
-            this.ExceptionButton.Location = new System.Drawing.Point(453, 12);
-            this.ExceptionButton.Name = "ExceptionButton";
-            this.ExceptionButton.Size = new System.Drawing.Size(127, 23);
-            this.ExceptionButton.TabIndex = 11;
-            this.ExceptionButton.Text = "Throw Exception";
-            this.ExceptionButton.UseVisualStyleBackColor = true;
+            this.LogoutButton.Location = new System.Drawing.Point(453, 12);
+            this.LogoutButton.Name = "LogoutButton";
+            this.LogoutButton.Size = new System.Drawing.Size(127, 23);
+            this.LogoutButton.TabIndex = 11;
+            this.LogoutButton.Text = "Logout";
+            this.LogoutButton.UseVisualStyleBackColor = true;
             // 
             // SquishPicsForm
             // 
@@ -58,7 +58,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(673, 450);
             this.Controls.Add(this.ApiKeyButton);
-            this.Controls.Add(this.ExceptionButton);
+            this.Controls.Add(this.LogoutButton);
             this.MinimumSize = new System.Drawing.Size(689, 489);
             this.Name = "SquishPicsForm";
             this.Text = "SquishPics";
@@ -71,6 +71,6 @@
         
         private Button ApiKeyButton;
         private ColorDialog colorDialog1;
-        private Button ExceptionButton;
+        private Button LogoutButton;
     }
 }

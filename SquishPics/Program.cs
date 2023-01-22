@@ -17,13 +17,13 @@ internal sealed class Program
     private static readonly ILog _log;
     private static readonly DiscordClient _client;
     private static readonly GlobalKeyboardHook _keyboardHook;
-    private static readonly DiscordOAuth2 _OAuth2;
+    private static readonly DiscordOAuth2 _oAuth2;
 
     static Program()
     {
         _log = LogProvider<Program>.GetLogger();
-        _OAuth2 = new DiscordOAuth2();
-        _client = new(LogProvider<DiscordClient>.GetLogger(), _OAuth2);
+        _oAuth2 = new DiscordOAuth2();
+        _client = new(LogProvider<DiscordClient>.GetLogger(), _oAuth2);
         _keyboardHook = new();
     }
     
@@ -48,17 +48,17 @@ internal sealed class Program
             var container = new ControlsContainer(
                 LogProvider<ConnectingControl>.GetLogger(), _client, _keyboardHook, requestController, dataProcessor, messageService);
             
-            Application.Run(new SquishPicsForm(container, _client, new WebPopup(_OAuth2), new ApiKeyForm()));
+            Application.Run(new SquishPicsForm(container, _client, new WebPopup(_oAuth2), new ApiKeyForm()));
         }
         catch (FileNotFoundException e)
         {
-            MessageBox.Show($"Error on startup... Could not resolve libs/pingo.exe\n{e}", "Fatal Error",
+            MessageBox.Show($"Error on startup... {e.Message}\n{e}", "Fatal Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         catch (Exception e)
         {
-            MessageBox.Show($"Unspecified error on startup...\n{e}", @"Fatal Error", MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            MessageBox.Show($"Unspecified error on startup...\n{e}", @"Fatal Error", 
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally
         {
@@ -78,10 +78,23 @@ internal sealed class Program
             ?? throw new InvalidOperationException("Could not retrieve appRoot.");
         
         var pingoPath = Path.Combine(appRoot, @"libs\pingo.exe");
+        var oAuth2ServerPath = Path.Combine(appRoot, @"libs\OAuth2Server.exe");
         var log4NetConfigPath = Path.Combine(appRoot, @"log4net.config");
 
-        if (! File.Exists(pingoPath) || !File.Exists(log4NetConfigPath)) 
-            throw new FileNotFoundException("Could not find dependencies");
+        if (!File.Exists(log4NetConfigPath))
+        {
+            throw new FileNotFoundException("Could not find dependency: log4net.config");
+        }
+
+        if (!File.Exists(pingoPath))
+        {
+            throw new FileNotFoundException("Could not find dependency: libs\\pingoPath.exe");
+        }
+
+        if (!File.Exists(oAuth2ServerPath))
+        {
+            throw new FileNotFoundException("Could not find dependency: libs\\OAuth2Server.exe");
+        }
     }
 
     private static void InitializeConfigurations()
@@ -98,6 +111,7 @@ internal sealed class Program
         _client.StopAsync().Wait();
         GlobalSettings.ForceSave();
         GlobalSettings.StopAutoSave();
+        _oAuth2.StopServer();
         _keyboardHook.Unhook();
     }
 

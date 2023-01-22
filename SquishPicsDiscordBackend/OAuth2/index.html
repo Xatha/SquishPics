@@ -1,18 +1,31 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base href="/">
     <link rel="stylesheet" type="text/css" href="output.css" >
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Login</title>
 </head>
 <body>
-<div class="flex items-center justify-center h-screen bg-discord-gray text-white" >
-    <a id="login" href="https://discord.com/api/oauth2/authorize?client_id=1059545061374836736&redirect_uri=http%3A%2F%2Flocalhost%3A53134%2Fauth%2Fdiscord&response_type=token&scope=identify" class="bg-discord-blue  text-xl px-5 py-3 rounded-md font-bold flex items-center space-x-4 hover:bg-gray-600 transition duration-75">
-        <i class="fa-brands fa-discord text-2xl"></i>
-        <span>Login with Discord</span>
-    </a>
-</div>
+    <div class="container bg-discord-gray h-screen text-white justify-center">
+        <div>
+            <div class="font-bold note text-white bg-discord-gray justify-center">
+                <h1 class="flex justify-center bg-discord-gray text-white">Please verify your account to use SquishPics.</h1>
+            </div>
+            <div class="flex items-center justify-center">
+                <a id="login" href="https://discord.com/api/oauth2/authorize?client_id=1059545061374836736&redirect_uri=http%3A%2F%2Flocalhost%3A53134%2Fauth%2Fdiscord&response_type=token&scope=identify" class="bg-discord-blue text-xl px-5 py-3 rounded-md font-bold flex items-center space-x-4 hover:bg-gray-600 transition duration-75">
+                    <i class="fa-brands fa-discord text-2xl"></i>
+                    <span>Login with Discord</span>
+                </a>
+            </div>
+            <div class="font-bold note text-white bg-discord-gray justify-center">
+                <h1 > Note: This program does not fetch any user-identifiable secrets.<br>
+                    It fetches a public discord user-ID which SquishPics uses to verify your permissions.<br>
+                    No personal information is harvest, distributed, or saved.</h1>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

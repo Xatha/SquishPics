@@ -4,6 +4,7 @@ const router = express.Router();
 const app = express();
 
 process.argv.forEach(function (val, index) {
+    console.log(index + ': ' + val);
     if (val === "--port") {
         try {
             const port = parseInt(process.argv[index + 1]);

@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -7,7 +6,7 @@ namespace SquishPicsDiscordBackend.OAuth2;
 
 public class DiscordOAuth2
 {
-    private static Process _OAuth2Server;
+    private static Process? _oAuth2Server;
     private static OAuth2Token? _cachedToken;
 
     private static bool _tokenExpired;
@@ -19,31 +18,37 @@ public class DiscordOAuth2
     {
         RetrieveToken();
     }
-
-    public DiscordOAuth2()
-    {
-    }
     
     public void StartServer()
     {
-        _OAuth2Server = Process.Start(new ProcessStartInfo
+        _oAuth2Server = Process.Start(new ProcessStartInfo
         {
             FileName = "libs\\OAuth2Server",
             Arguments = "--port 53134", //TODO: Get port from config
-            UseShellExecute = false
+            UseShellExecute = false,
+            WindowStyle = ProcessWindowStyle.Hidden,
+            CreateNoWindow = true
         }) ?? throw new NullReferenceException("OAuth2Server process could no start.");
     }
+    
+    public void StopServer() => _oAuth2Server?.Kill();
 
     public void SetToken(string json)
     {
         var rawOAuth2Token = JsonConvert.DeserializeObject<RawOAuth2Token>(json);
         if (rawOAuth2Token == null) throw new JsonSerializationException("Failed to deserialize token");
         
-
         _cachedToken = new OAuth2Token(
             rawOAuth2Token.Username, rawOAuth2Token.Discriminator, rawOAuth2Token.UserId, rawOAuth2Token.ExpiresAt);
         _tokenExpired = false;
         CacheToken(_cachedToken);
+    }
+    
+    public static void ResetToken()
+    {
+        File.Delete("token.json");
+        _cachedToken = null;
+        _tokenExpired = true;
     }
     
     private static void RetrieveToken()
@@ -78,7 +83,6 @@ public class DiscordOAuth2
         File.WriteAllText("token.json", jsonString);
     }
 }
-
 
 public record RawOAuth2Token(string Username, string Discriminator, ulong UserId, long ExpiresAt)
 {

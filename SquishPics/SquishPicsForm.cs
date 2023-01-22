@@ -1,8 +1,8 @@
 using System.ComponentModel;
-using Discord;
 using SquishPics.Controls;
 using SquishPics.Forms;
 using SquishPicsDiscordBackend;
+using SquishPicsDiscordBackend.OAuth2;
 
 namespace SquishPics;
 
@@ -11,7 +11,7 @@ public partial class SquishPicsForm : Form
     private readonly ApiKeyForm _apiKeyForm;
     private readonly WebPopup _webPopup;
     private readonly ControlsContainer _controls;
-    private DiscordClient _client;
+    private readonly DiscordClient _client;
 
     public SquishPicsForm(ControlsContainer controls, DiscordClient client, WebPopup webPopup, ApiKeyForm apiKeyForm)
     {
@@ -23,12 +23,11 @@ public partial class SquishPicsForm : Form
 
         _apiKeyForm.VisibleChanged += APIKeyForm_VisibleChanged;
         ApiKeyButton.Click += ApiKeyButton_Click;
-        ExceptionButton.Click += ExceptionButton_Click;
+        LogoutButton.Click += LogoutButton_Click;
         Closing += SquishPicsForm_Closing;
         _client.AuthenticationNeeded += Client_AuthenticationNeeded;
     }
     
-
     private async void Client_AuthenticationNeeded(object sender, Func<Task> callback)
     {
         Enabled = false;
@@ -44,11 +43,19 @@ public partial class SquishPicsForm : Form
         _controls.Dispose();
     }
 
-    private async void ExceptionButton_Click(object? sender, EventArgs e)
+    private void LogoutButton_Click(object? sender, EventArgs e)
     {
+        var dialogResult = MessageBox.Show("Are you sure you want to logout? This will restart the application.", 
+            "Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        
+        if (dialogResult == DialogResult.Yes)
+        {
+            DiscordOAuth2.ResetToken();
+            
+            Application.Restart();
+        }
     }
 
-    //TODO: Move these propagated events to a separate class
     private async void Form1_Load(object sender, EventArgs e)
     {
         await _controls.InitializeControlsAsync(this);

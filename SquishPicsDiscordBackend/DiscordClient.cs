@@ -13,7 +13,7 @@ public class DiscordClient
     private readonly ILog _log;
     private readonly DiscordSocketClient _socketClient;
     private readonly DiscordOAuth2 _authentication;
-    public event EventHandler<Func<Task>> AuthenticationNeeded;
+    public event EventHandler<Func<Task>>? AuthenticationNeeded;
 
 
     public DiscordClient(ILog log, DiscordOAuth2 authentication)
@@ -85,7 +85,7 @@ public class DiscordClient
         {
             var socketGuild = _socketClient.GetGuild(guild.Id);
             await socketGuild.DownloadUsersAsync();
-            if (socketGuild?.GetUser(_authentication.Token.UserId) != null) accessibleGuilds.Add(guild);
+            if (socketGuild.GetUser(_authentication.Token.UserId) != null) accessibleGuilds.Add(guild);
         }
 
         return accessibleGuilds;
