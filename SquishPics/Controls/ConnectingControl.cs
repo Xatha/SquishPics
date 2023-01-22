@@ -53,13 +53,23 @@ public partial class ConnectingControl : UserControl
 
     private async void button1_Click(object sender, EventArgs e)
     {
-        if (await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.API_KEY) is var key && key is null)
+        try
         {
-            await _log.WarnAsync("No API key set, cannot connect to Discord");
-            return;
-        }
+            if (await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.API_KEY) is var key && key is null)
+            {
+                await _log.WarnAsync("No API key set, cannot connect to Discord");
+                return;
+            }
 
-        await _discordClient.RetryLoginAsync(key);
+            await _discordClient.RetryLoginAsync(key);
+        }
+        catch (ArgumentException exception)
+        {
+            await _log.WarnAsync("No API valid key set, cannot connect to Discord", exception);
+            MessageBox.Show("No valid API key set, cannot connect to Discord", "Warning", 
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+        catch (Exception exception) { }
     }
 
     protected override void Dispose(bool disposing)

@@ -16,8 +16,9 @@ public partial class ApiKeyForm : Form
     protected override async void OnFormClosing(FormClosingEventArgs e)
     {
         var apiKey = await GlobalSettings.SafeGetSettingAsync<string>(SettingKeys.API_KEY);
-        if (apiKey != APIKEYTextBox.Text)
-            await GlobalSettings.SafeSetSettingAsync(SettingKeys.API_KEY, APIKEYTextBox.Text);
+        var newApiKey = APIKEYTextBox.Text.Trim();
+        if (apiKey != newApiKey)
+            await GlobalSettings.SafeSetSettingAsync(SettingKeys.API_KEY, newApiKey);
 
         base.OnFormClosing(e);
         if (e.CloseReason == CloseReason.WindowsShutDown) return;

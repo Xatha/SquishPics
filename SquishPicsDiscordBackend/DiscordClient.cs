@@ -50,6 +50,7 @@ public class DiscordClient
 
     public async Task RetryLoginAsync(string apiKey)
     {
+        TokenUtils.ValidateToken(TokenType.Bot, apiKey);
         await _log.DebugAsync("Retrying connecting to Discord client...");
 
         await _socketClient.StopAsync();
@@ -63,7 +64,7 @@ public class DiscordClient
             OnAuthenticationRequired( () => StartAsync(apiKey));
             return;
         }
-
+        
         await _socketClient.LoginAsync(TokenType.Bot, apiKey);
         await _socketClient.StartAsync();
     }
@@ -116,8 +117,6 @@ public class DiscordClient
             select textChannel;
     
         return Task.FromResult(channelQuery);
-
-
     }
 
     protected virtual void OnAuthenticationRequired(Func<Task> e)
