@@ -67,6 +67,7 @@
             this.SortingModesComboBox.Items.AddRange(new object[] {
             "Name",
             "Date Modified",
+            "Date Created",
             "Type",
             "Size"});
             this.SortingModesComboBox.Location = new System.Drawing.Point(0, 18);

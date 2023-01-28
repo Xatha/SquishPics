@@ -177,6 +177,8 @@ public partial class FileQueueControl : UserControl
             ("Type", "Descending") => unsortedFiles.OrderByDescending(f => f.Extension), 
             ("Date Modified", "Ascending")  => unsortedFiles.OrderBy(f => f.LastWriteTimeUtc),
             ("Date Modified", "Descending") => unsortedFiles.OrderByDescending(f => f.LastWriteTimeUtc),
+            ("Date Created", "Ascending")  => unsortedFiles.OrderBy(f => f.CreationTimeUtc),
+            ("Date Created", "Descending") => unsortedFiles.OrderByDescending(f => f.CreationTimeUtc),
             _ => unsortedFiles
         };
         return fileSortType.ToList();

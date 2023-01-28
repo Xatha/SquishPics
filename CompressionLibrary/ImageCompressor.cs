@@ -69,7 +69,9 @@ public class ImageCompressor : IImageCompressor
         {
             FileName = "libs\\pingo",
             Arguments = $"pingo -auto=100 {_imageFiles.First().Directory?.FullName}",
-            UseShellExecute = false
+            UseShellExecute = false,
+            WindowStyle = ProcessWindowStyle.Hidden,
+            CreateNoWindow = true
         }) ?? throw new Exception("Could not start pingo")); //TODO: Add proper exception.
     }
 
